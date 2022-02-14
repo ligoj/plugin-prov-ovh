@@ -1,0 +1,48 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
+callback({
+   "vers":0.01,
+   "config":{
+      "rate":"perhr",
+      "valueColumns":[
+         "linux",
+         "mswin"
+      ],
+      "currencies":[
+         "USD"
+      ],
+      "regions":[
+        {
+            "region":"eu-ireland",
+            "footnotes":{
+               "*":"notAvailableForCCorCGPU"
+            },
+            "instanceTypes":[
+               {
+                  "type":"computePreviousGen",
+                  "sizes":[
+                     {
+                        "size":"-- broken reference ---",
+                        "valueColumns":[
+                           {
+                              "name":"linux",
+                              "prices":{
+                                 "USD":"0.0284"
+                              }
+                           },
+                           {
+                              "name":"mswin",
+                              "prices":{
+                                 "USD":"0.096"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ]
+         }
+      ]
+   }
+});

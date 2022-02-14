@@ -1,0 +1,4 @@
+id;name;refined.id;mode;uiClasses;tag;tagUiClasses
+service:prov;Provisioning;;LINK;fas fa-server;technical;fa fa-industry
+service:prov:ovh;Provisioning ovh;service:prov;LINK;;;
+service:prov:ovh:test;Provisioning ovh Test;service:prov:ovh;LINK;;;
