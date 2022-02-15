@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AwsEc2Price;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhEc2Price;
 import org.ligoj.bootstrap.core.csv.AbstractCsvManager;
 import org.ligoj.bootstrap.core.csv.CsvBeanReader;
 import org.ligoj.bootstrap.core.csv.CsvReader;
@@ -21,7 +21,7 @@ import org.ligoj.bootstrap.core.resource.TechnicalException;
  *
  * @param <T> The target bean type.
  */
-public abstract class AbstractAwsCsvForBean<T> extends AbstractCsvManager {
+public abstract class AbstractOvhCsvForBean<T> extends AbstractCsvManager {
 
 	private final CsvBeanReader<T> beanReader;
 
@@ -39,7 +39,7 @@ public abstract class AbstractAwsCsvForBean<T> extends AbstractCsvManager {
 	}
 
 	/**
-	 * Build the reader parsing the CSV file from AWS to build {@link AwsEc2Price} instances. Non AWS instances data are
+	 * Build the reader parsing the CSV file from AWS to build {@link OvhEc2Price} instances. Non AWS instances data are
 	 * skipped, and headers are ignored.
 	 *
 	 * @param reader   The original AWS CSV input.
@@ -47,7 +47,7 @@ public abstract class AbstractAwsCsvForBean<T> extends AbstractCsvManager {
 	 * @param beanType The target bean type.
 	 * @throws IOException When the CSV content cannot be read.
 	 */
-	protected AbstractAwsCsvForBean(final BufferedReader reader, final Map<String, String> mapping,
+	protected AbstractOvhCsvForBean(final BufferedReader reader, final Map<String, String> mapping,
 			final Class<T> beanType) throws IOException {
 
 		// Complete the standard mappings

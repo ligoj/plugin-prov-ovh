@@ -6,7 +6,7 @@ package org.ligoj.app.plugin.prov.ovh.catalog;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.ligoj.app.plugin.prov.ovh.catalog.AwsPriceImportBase.CONF_URL_AWS_PRICES;
+import static org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImportBase.CONF_URL_AWS_PRICES;
 import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builder;
 
 import java.io.BufferedReader;
@@ -63,9 +63,9 @@ import org.ligoj.app.plugin.prov.model.ProvTenancy;
 import org.ligoj.app.plugin.prov.model.ProvUsage;
 import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.model.VmOs;
-import org.ligoj.app.plugin.prov.ovh.ProvAwsPluginResource;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AwsEc2Price;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AwsPriceImportEc2;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhEc2Price;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhPriceImportEc2;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.CsvForBeanEc2;
 import org.ligoj.app.plugin.prov.quote.container.ProvQuoteContainerResource;
 import org.ligoj.app.plugin.prov.quote.container.QuoteContainerQuery;
@@ -87,17 +87,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Test class of {@link AwsPriceImport}
+ * Test class of {@link OvhPriceImport}
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-class AwsPriceImportTest extends AbstractServerTest {
+class OvhPriceImportTest extends AbstractServerTest {
 
 	private static final double DELTA = 0.001;
 
-	private AwsPriceImport resource;
+	private OvhPriceImport resource;
 
 	@Autowired
 	private ProvResource provResource;
@@ -168,18 +168,18 @@ class AwsPriceImportTest extends AbstractServerTest {
 		// Mock catalog import helper
 		final var helper = new ImportCatalogResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(helper);
-		this.resource = initCatalog(helper, new AwsPriceImport());
-		this.resource.setBase(initCatalog(helper, new AwsPriceImportBase()));
-		this.resource.setEc2(initCatalog(helper, new AwsPriceImportEc2() {
+		this.resource = initCatalog(helper, new OvhPriceImport());
+		this.resource.setBase(initCatalog(helper, new OvhPriceImportBase()));
+		this.resource.setEc2(initCatalog(helper, new OvhPriceImportEc2() {
 			@Override
-			public AwsPriceImportEc2 newProxy() {
+			public OvhPriceImportEc2 newProxy() {
 				return this;
 			}
 
 		}));
 		configuration.put(ProvResource.USE_PARALLEL, "0");
 		configuration.put(CONF_URL_AWS_PRICES, "http://localhost:" + MOCK_PORT);
-		configure(AwsPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
+		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
 
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
@@ -216,8 +216,8 @@ class AwsPriceImportTest extends AbstractServerTest {
 	 */
 	@Test
 	void dummyCoverage() throws IOException {
-		new AwsEc2Price().getDrop();
-		new AwsPriceImportEc2().newProxy();
+		new OvhEc2Price().getDrop();
+		new OvhPriceImportEc2().newProxy();
 	}
 
 	/**
@@ -453,7 +453,7 @@ class AwsPriceImportTest extends AbstractServerTest {
 
 		// Point to another catalog with updated prices
 		mockServices("-v2");
-		configure(AwsPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/v2/spot.js");
+		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/v2/spot.js");
 
 		// Install the new catalog, update/deletion occurs
 		// Code 'HF7N6NNE7N8GDMBE' and '000000000000_NEW' are deleted
@@ -570,12 +570,12 @@ class AwsPriceImportTest extends AbstractServerTest {
 	@Test
 	void installOnLine() throws Exception {
 		configuration.delete(CONF_URL_AWS_PRICES);
-		configuration.delete(AwsPriceImportEc2.CONF_URL_EC2_PRICES_SPOT);
-		configuration.put(AwsPriceImportBase.CONF_REGIONS, "eu-west-1"); // Only one region for UTs
-		configuration.put(AwsPriceImportEc2.CONF_OS, "LINUX"); // Only one OS for UTs
+		configuration.delete(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT);
+		configuration.put(OvhPriceImportBase.CONF_REGIONS, "eu-west-1"); // Only one region for UTs
+		configuration.put(OvhPriceImportEc2.CONF_OS, "LINUX"); // Only one OS for UTs
 
 		// Only "r4.large" and "t2.*","i.*,c1" for UTs
-		configuration.put(AwsPriceImportEc2.CONF_ITYPE, "(r4|t2|i1|c1)\\..*");
+		configuration.put(OvhPriceImportEc2.CONF_ITYPE, "(r4|t2|i1|c1)\\..*");
 
 		// Aligned to :
 		// https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/
@@ -655,7 +655,7 @@ class AwsPriceImportTest extends AbstractServerTest {
 		mockAll();
 		mock404("/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/current/eu-west-1/index.json");
 
-		configuration.put(AwsPriceImportBase.CONF_REGIONS, "eu-west-1"); // Only one region for UTs
+		configuration.put(OvhPriceImportBase.CONF_REGIONS, "eu-west-1"); // Only one region for UTs
 		startMockServer();
 		checkNoSavingsPlan();
 	}
@@ -764,7 +764,7 @@ class AwsPriceImportTest extends AbstractServerTest {
 	@Test
 	void installSpotEmpty() throws Exception {
 		mockAll();
-		configure(AwsPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/any.js");
+		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/any.js");
 		mock("/spot-fargate.json", "mock-server/aws/spot-fargate-empty.json");
 		mock("/spot.json", "mock-server/aws/spot-empty.js");
 		startMockServer();
@@ -1024,6 +1024,6 @@ class AwsPriceImportTest extends AbstractServerTest {
 	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
-		return getSubscription(project, ProvAwsPluginResource.KEY);
+		return getSubscription(project, ProvOvhPluginResource.KEY);
 	}
 }

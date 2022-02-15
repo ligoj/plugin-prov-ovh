@@ -18,7 +18,7 @@ import org.ligoj.app.plugin.prov.ovh.catalog.UpdateContext;
  * Context used to perform catalog update.
  */
 public class LocalEc2Context
-		extends AbsractLocalContext<ProvInstanceType, ProvInstancePrice, AwsEc2Price, ProvQuoteInstance> {
+		extends AbsractLocalContext<ProvInstanceType, ProvInstancePrice, OvhEc2Price, ProvQuoteInstance> {
 
 	/**
 	 * Context from the parent.

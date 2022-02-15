@@ -7,7 +7,7 @@ import org.ligoj.app.plugin.prov.model.AbstractInstanceType;
 import org.ligoj.app.plugin.prov.model.AbstractQuoteVmOs;
 import org.ligoj.app.plugin.prov.model.AbstractTermPriceVmOs;
 import org.ligoj.app.plugin.prov.ovh.catalog.AbsractLocalContext;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractAwsVmOsPrice;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractOvhVmOsPrice;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractCsvForBeanEc2;
 
 /**
@@ -20,7 +20,7 @@ import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractCsvForBeanEc2;
  * @param <X> The context type.
  * @param <R> The CSV bean reader type.
  */
-public abstract class AbstractAwsPriceImportVmOs<T extends AbstractInstanceType, P extends AbstractTermPriceVmOs<T>, C extends AbstractAwsVmOsPrice, Q extends AbstractQuoteVmOs<P>, X extends AbsractLocalContext<T, P, C, Q>, R extends AbstractCsvForBeanEc2<C>>
+public abstract class AbstractAwsPriceImportVmOs<T extends AbstractInstanceType, P extends AbstractTermPriceVmOs<T>, C extends AbstractOvhVmOsPrice, Q extends AbstractQuoteVmOs<P>, X extends AbsractLocalContext<T, P, C, Q>, R extends AbstractCsvForBeanEc2<C>>
 		extends AbstractAwsPriceImportVm<T, P, C, Q, X, R> {
 
 	@Override

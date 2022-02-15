@@ -21,8 +21,8 @@ import org.ligoj.app.plugin.prov.model.ProvQuoteInstance;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvTenancy;
 import org.ligoj.app.plugin.prov.model.VmOs;
-import org.ligoj.app.plugin.prov.ovh.ProvAwsPluginResource;
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsPriceImportBase;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImportBase;
 import org.ligoj.app.plugin.prov.ovh.catalog.UpdateContext;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.AbstractAwsPriceImportVmOs;
 import org.ligoj.bootstrap.core.SpringUtils;
@@ -38,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class AwsPriceImportEc2 extends
-		AbstractAwsPriceImportVmOs<ProvInstanceType, ProvInstancePrice, AwsEc2Price, ProvQuoteInstance, LocalEc2Context, CsvForBeanEc2> {
+public class OvhPriceImportEc2 extends
+		AbstractAwsPriceImportVmOs<ProvInstanceType, ProvInstancePrice, OvhEc2Price, ProvQuoteInstance, LocalEc2Context, CsvForBeanEc2> {
 
 	/**
 	 * Service code.
@@ -60,18 +60,18 @@ public class AwsPriceImportEc2 extends
 	/**
 	 * Configuration key used for {@link #EC2_PRICES_SPOT}
 	 */
-	public static final String CONF_URL_EC2_PRICES_SPOT = String.format(AwsPriceImportBase.CONF_URL_TMP_PRICES,
+	public static final String CONF_URL_EC2_PRICES_SPOT = String.format(OvhPriceImportBase.CONF_URL_TMP_PRICES,
 			API_SPOT);
 
 	/**
 	 * Configuration key used for enabled OS pattern names. When value is <code>null</code>, no restriction.
 	 */
-	public static final String CONF_OS = ProvAwsPluginResource.KEY + ":os";
+	public static final String CONF_OS = ProvOvhPluginResource.KEY + ":os";
 
 	/**
 	 * Configuration key used for enabled instance type pattern names. When value is <code>null</code>, no restriction.
 	 */
-	public static final String CONF_ITYPE = ProvAwsPluginResource.KEY + ":instance-type";
+	public static final String CONF_ITYPE = ProvOvhPluginResource.KEY + ":instance-type";
 
 	/**
 	 * Mapping from AWS software to standard form.
@@ -95,7 +95,7 @@ public class AwsPriceImportEc2 extends
 	}
 
 	@Override
-	protected void installPrice(final LocalEc2Context context, final AwsEc2Price csv) {
+	protected void installPrice(final LocalEc2Context context, final OvhEc2Price csv) {
 		if (csv.getFamily().startsWith("Compute Instance")) {
 			if (!handlePartialCost(context, csv)) {
 				// No up-front, cost is fixed
@@ -133,14 +133,14 @@ public class AwsPriceImportEc2 extends
 	}
 
 	@Override
-	protected boolean isEnabled(final LocalEc2Context context, final AwsEc2Price csv) {
+	protected boolean isEnabled(final LocalEc2Context context, final OvhEc2Price csv) {
 		return !csv.getFamily().startsWith("Compute Instance")
 				|| super.isEnabled(context, csv) && "Used".equals(csv.getCapacityStatus()) && !"NA".equals(csv.getOs());
 	}
 
 	@Override
-	public AwsPriceImportEc2 newProxy() {
-		return SpringUtils.getBean(AwsPriceImportEc2.class);
+	public OvhPriceImportEc2 newProxy() {
+		return SpringUtils.getBean(OvhPriceImportEc2.class);
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class AwsPriceImportEc2 extends
 	 * @param json    The current JSON entry.
 	 * @param term    The related AWS Spot instance price term.
 	 */
-	private void installSpotPrices(final LocalEc2Context context, final AwsEc2SpotPrice json,
+	private void installSpotPrices(final LocalEc2Context context, final OvhEc2SpotPrice json,
 			final ProvInstancePriceTerm term) {
 		final var region = context.getRegion();
 		final var type = context.getLocalTypes().get(json.getName());
@@ -212,7 +212,7 @@ public class AwsPriceImportEc2 extends
 	}
 
 	@Override
-	protected void copy(final AwsEc2Price csv, final ProvInstancePrice p) {
+	protected void copy(final OvhEc2Price csv, final ProvInstancePrice p) {
 		super.copy(csv, p);
 		final var software = ObjectUtils.defaultIfNull(csv.getSoftware(), "");
 		p.setSoftware(StringUtils.trimToNull(mapSoftware.computeIfAbsent(software, String::toUpperCase)));

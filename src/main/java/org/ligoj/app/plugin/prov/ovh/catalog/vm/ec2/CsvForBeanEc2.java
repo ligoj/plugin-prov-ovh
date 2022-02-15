@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Read AWS EC2 CSV input, skipping the AWS headers and non instance type rows.
  */
-public class CsvForBeanEc2 extends AbstractCsvForBeanEc2<AwsEc2Price> {
+public class CsvForBeanEc2 extends AbstractCsvForBeanEc2<OvhEc2Price> {
 
 	/**
 	 * EC2 CSV Mapping to Java bean property
@@ -33,14 +33,14 @@ public class CsvForBeanEc2 extends AbstractCsvForBeanEc2<AwsEc2Price> {
 			"Storage Snapshot", "Compute Instance", "Compute Instance (bare metal)");
 
 	/**
-	 * Build the reader parsing the CSV file from AWS to build {@link AwsEc2Price} instances. Non AWS instances data are
+	 * Build the reader parsing the CSV file from AWS to build {@link OvhEc2Price} instances. Non AWS instances data are
 	 * skipped, and headers are ignored.
 	 *
 	 * @param reader The original AWS CSV input.
 	 * @throws IOException When CSV content cannot be read.
 	 */
 	public CsvForBeanEc2(final BufferedReader reader) throws IOException {
-		super(reader, HEADERS_MAPPING, AwsEc2Price.class);
+		super(reader, HEADERS_MAPPING, OvhEc2Price.class);
 	}
 
 	@Override

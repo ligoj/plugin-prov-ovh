@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * The provisioning price service for AWS. Manage install or update of prices.
  */
 @Slf4j
-public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
+public abstract class AbstractOvhImport extends AbstractImportCatalogResource {
 
 	@Autowired
 	private ProvResource provResource;
@@ -81,7 +81,7 @@ public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
 	 * @param region  The region API name to test.
 	 * @return <code>true</code> when the configuration enable the given region.
 	 */
-	protected boolean isEnabledRegion(final UpdateContext context, final AwsRegionPrices region) {
+	protected boolean isEnabledRegion(final UpdateContext context, final OvhRegionPrices region) {
 		return isEnabledRegion(context, region.getRegion()) && !"us-west-2-lax-1a".equals(region.getRegion());
 	}
 
@@ -98,7 +98,7 @@ public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
 	 * @param mapper   The mapping function from JSON at region level to JPA entity.
 	 * @throws IOException When JSON content cannot be parsed.
 	 */
-	protected <R extends AwsRegionPrices, J extends AwsPrices<R>> void installJsonPrices(final UpdateContext context,
+	protected <R extends OvhRegionPrices, J extends OvhPrices<R>> void installJsonPrices(final UpdateContext context,
 			final String api, final String endpoint, final Class<J> apiClass, final Consumer<R> mapper)
 			throws IOException {
 		log.info("AWS {} prices...", api);
@@ -134,10 +134,10 @@ public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
 	 * @return The regions with the corresponding prices file. The key corresponds to the API region code.
 	 * @throws IOException When the index cannot be retrieved.
 	 */
-	protected Map<String, AwsPriceRegion> getRegionalPrices(final UpdateContext context, final String api,
+	protected Map<String, OvhPriceRegion> getRegionalPrices(final UpdateContext context, final String api,
 			final String serviceCode) throws MalformedURLException, IOException {
-		return getRegionalSPPrices(context, api, serviceCode, AwsPriceOffer::getCurrentRegionIndexUrl,
-				AwsPriceRegions.class, "OnDemand");
+		return getRegionalSPPrices(context, api, serviceCode, OvhPriceOffer::getCurrentRegionIndexUrl,
+				OvhPriceRegions.class, "OnDemand");
 	}
 
 	/**
@@ -149,10 +149,10 @@ public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
 	 * @return The regions with the corresponding savings plan prices file. The key corresponds to the API region code.
 	 * @throws IOException When the index cannot be retrieved.
 	 */
-	protected Map<String, AwsPriceRegion> getRegionalSPPrices(final UpdateContext context, final String api,
+	protected Map<String, OvhPriceRegion> getRegionalSPPrices(final UpdateContext context, final String api,
 			final String serviceCode) throws MalformedURLException, IOException {
-		return getRegionalSPPrices(context, api, serviceCode, AwsPriceOffer::getCurrentSavingsPlanIndexUrl,
-				AwsSPPriceRegions.class, "SavingsPlan");
+		return getRegionalSPPrices(context, api, serviceCode, OvhPriceOffer::getCurrentSavingsPlanIndexUrl,
+				OvhSPPriceRegions.class, "SavingsPlan");
 	}
 
 	/**
@@ -166,8 +166,8 @@ public abstract class AbstractAwsImport extends AbstractImportCatalogResource {
 	 * @return The regions with the corresponding savings plan prices file. The key corresponds to the API region code.
 	 * @throws IOException When the index cannot be retrieved.
 	 */
-	private Map<String, AwsPriceRegion> getRegionalSPPrices(final UpdateContext context, final String api,
-			final String serviceCode, final Function<AwsPriceOffer, String> toUrl,
+	private Map<String, OvhPriceRegion> getRegionalSPPrices(final UpdateContext context, final String api,
+			final String serviceCode, final Function<OvhPriceOffer, String> toUrl,
 			final Class<? extends RegionalPrices> clazz, final String classifier)
 			throws MalformedURLException, IOException {
 		final var path = toUrl.apply(context.getOffers().get(serviceCode));

@@ -3,17 +3,29 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * The region container type.
+ * Service regional price configuration.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwsRegionPrices {
-	private String region;
+public class OvhPriceRegion {
+
+	/**
+	 * Region code.
+	 */
+	private String regionCode;
+
+	/**
+	 * Price URL of the selected region.
+	 */
+	@JsonAlias({"currentVersionUrl", "versionUrl"})
+	private String url;
+
 }

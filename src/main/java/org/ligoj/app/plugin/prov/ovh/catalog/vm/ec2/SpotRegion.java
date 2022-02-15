@@ -5,7 +5,7 @@ package org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2;
 
 import java.util.Collection;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsRegionPrices;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhRegionPrices;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SpotRegion extends AwsRegionPrices {
+public class SpotRegion extends OvhRegionPrices {
 	private Collection<SpotInstanceType> instanceTypes;
 
 	/**
@@ -28,7 +28,7 @@ public class SpotRegion extends AwsRegionPrices {
 	@Setter
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class SpotInstanceType {
-		private Collection<AwsEc2SpotPrice> sizes;
+		private Collection<OvhEc2SpotPrice> sizes;
 	}
 
 }

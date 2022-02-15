@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class AwsCsvPrice {
+public class OvhCsvPrice {
 
 	/**
 	 * Ignored property

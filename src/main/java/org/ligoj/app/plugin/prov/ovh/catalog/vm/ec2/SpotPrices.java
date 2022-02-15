@@ -3,7 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsPrices;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhPrices;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,6 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SpotPrices extends AwsPrices<SpotRegion> {
+public class SpotPrices extends OvhPrices<SpotRegion> {
 	// Only for typing
 }

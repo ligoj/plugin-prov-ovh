@@ -20,17 +20,17 @@ import lombok.Setter;
  * @see {@link https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/20210304163809/af-south-1/index.csv}
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwsSPPriceRegions implements RegionalPrices {
+public class OvhSPPriceRegions implements RegionalPrices {
 
 	/**
 	 * AWS service code.
 	 */
 	@Setter
-	private List<AwsPriceRegion> regions;
+	private List<OvhPriceRegion> regions;
 
 	@Override
-	public Map<String, AwsPriceRegion> getPRegions() {
-		return regions.stream().collect(Collectors.toMap(AwsPriceRegion::getRegionCode, Function.identity()));
+	public Map<String, OvhPriceRegion> getPRegions() {
+		return regions.stream().collect(Collectors.toMap(OvhPriceRegion::getRegionCode, Function.identity()));
 	}
 
 }

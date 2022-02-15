@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AwsEc2Price;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhEc2Price;
 import org.ligoj.bootstrap.core.csv.CsvBeanReader;
 import org.ligoj.bootstrap.core.csv.CsvReader;
 
@@ -16,7 +16,7 @@ import org.ligoj.bootstrap.core.csv.CsvReader;
  *
  * @param <T> Target bean type.
  */
-public abstract class AbstractAwsCsvReader<T> extends CsvBeanReader<T> {
+public abstract class AbstractOvhCsvReader<T> extends CsvBeanReader<T> {
 
 	/**
 	 * CSV raw data reader.
@@ -24,13 +24,13 @@ public abstract class AbstractAwsCsvReader<T> extends CsvBeanReader<T> {
 	private final CsvReader csvReaderProxy;
 
 	/**
-	 * Build a CSV reader to build {@link AwsEc2Price} objects.
+	 * Build a CSV reader to build {@link OvhEc2Price} objects.
 	 *
 	 * @param reader   The CSV input, without headers and starting from the first raw.
 	 * @param headers  The header used to parse the CSV file.
 	 * @param beanType The target bean type.
 	 */
-	protected AbstractAwsCsvReader(final Reader reader, final String[] headers, final Class<T> beanType) {
+	protected AbstractOvhCsvReader(final Reader reader, final String[] headers, final Class<T> beanType) {
 		super(reader, beanType, headers);
 
 		// Makes visible this entry

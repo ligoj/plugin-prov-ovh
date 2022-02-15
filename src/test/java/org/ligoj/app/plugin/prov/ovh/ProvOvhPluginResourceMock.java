@@ -3,12 +3,12 @@
  */
 package org.ligoj.app.plugin.prov.ovh;
 
-import org.ligoj.app.plugin.prov.ovh.ProvAwsPluginResource;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
 
 /**
  * Configuration class used to mock AWS calls
  */
-public class ProvAwsPluginResourceMock extends ProvAwsPluginResource {
+public class ProvOvhPluginResourceMock extends ProvOvhPluginResource {
 	@Override
 	public boolean validateAccess(int subscription) {
 		return true;

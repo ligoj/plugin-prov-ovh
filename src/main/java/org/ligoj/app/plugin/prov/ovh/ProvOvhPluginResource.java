@@ -23,7 +23,7 @@ import org.ligoj.app.plugin.prov.catalog.ImportCatalogService;
 import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery;
 import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignerForAuthorizationHeader;
 import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery.AWS4SignatureQueryBuilder;
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsPriceImport;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
 import org.ligoj.app.plugin.prov.terraform.Context;
 import org.ligoj.app.plugin.prov.terraform.Terraforming;
 import org.ligoj.bootstrap.core.NamedBean;
@@ -38,14 +38,14 @@ import org.springframework.stereotype.Service;
  * The provisioning service for AWS. There is complete quote configuration along the subscription.
  */
 @Service
-@Path(ProvAwsPluginResource.URL)
+@Path(ProvOvhPluginResource.URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvAwsPluginResource extends AbstractProvResource implements Terraforming, ImportCatalogService {
+public class ProvOvhPluginResource extends AbstractProvResource implements Terraforming, ImportCatalogService {
 
 	/**
 	 * Plug-in key.
 	 */
-	public static final String URL = ProvResource.SERVICE_URL + "/aws";
+	public static final String URL = ProvResource.SERVICE_URL + "/ovh";
 
 	/**
 	 * Plug-in key.
@@ -84,10 +84,10 @@ public class ProvAwsPluginResource extends AbstractProvResource implements Terra
 	private ConfigurationResource configuration;
 
 	@Autowired
-	protected AwsPriceImport priceImport;
+	protected OvhPriceImport priceImport;
 
 	@Autowired
-	protected ProvAwsTerraformService terraformService;
+	protected ProvOvhTerraformService terraformService;
 
 	@Override
 	public String getKey() {

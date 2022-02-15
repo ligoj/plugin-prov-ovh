@@ -16,7 +16,7 @@ import org.ligoj.app.plugin.prov.catalog.ImportCatalog;
 import org.ligoj.app.plugin.prov.model.AbstractCodedEntity;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
-import org.ligoj.app.plugin.prov.ovh.ProvAwsPluginResource;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
 import org.ligoj.bootstrap.core.INamableBean;
 import org.springframework.stereotype.Component;
 
@@ -29,12 +29,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-public class AwsPriceImportBase extends AbstractAwsImport implements ImportCatalog<UpdateContext> {
+public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatalog<UpdateContext> {
 
 	/**
 	 * Configuration key used for enabled regions pattern names. When value is <code>null</code>, no restriction.
 	 */
-	public static final String CONF_REGIONS = ProvAwsPluginResource.KEY + ":regions";
+	public static final String CONF_REGIONS = ProvOvhPluginResource.KEY + ":regions";
 
 	/**
 	 * Path to root bulk price index.
@@ -46,7 +46,7 @@ public class AwsPriceImportBase extends AbstractAwsImport implements ImportCatal
 	/**
 	 * Configuration key used for AWS URL prices.
 	 */
-	public static final String CONF_URL_TMP_PRICES = ProvAwsPluginResource.KEY + ":%s-prices-url";
+	public static final String CONF_URL_TMP_PRICES = ProvOvhPluginResource.KEY + ":%s-prices-url";
 
 	/**
 	 * Configuration key used for {@link #AWS_PRICES_BASE}
@@ -90,7 +90,7 @@ public class AwsPriceImportBase extends AbstractAwsImport implements ImportCatal
 		final var baseUrl = basePrice + AWS_PRICES_PATH;
 		log.info("AWS {} import: download root index {}", "lambda", baseUrl);
 		try (var reader = new BufferedReader(new InputStreamReader(new URL(baseUrl).openStream()))) {
-			context.setOffers(objectMapper.readValue(reader, AwsPriceIndex.class).getOffers());
+			context.setOffers(objectMapper.readValue(reader, OvhPriceIndex.class).getOffers());
 		}
 	}
 

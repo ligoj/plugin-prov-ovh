@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
  * The provisioning S3 price service for AWS. Manage install or update of prices.
  */
 @Slf4j
-public abstract class AbstractAwsPriceImportMultiRegion<C extends AbstractAwsStoragePrice, R extends AbstractAwsCsvForBean<C>>
-		extends AbstractAwsImport implements ImportCatalog<UpdateContext> {
+public abstract class AbstractOvhPriceImportMultiRegion<C extends AbstractOvhStoragePrice, R extends AbstractOvhCsvForBean<C>>
+		extends AbstractOvhImport implements ImportCatalog<UpdateContext> {
 
 	/**
 	 * Install the prices from a single CSV file.

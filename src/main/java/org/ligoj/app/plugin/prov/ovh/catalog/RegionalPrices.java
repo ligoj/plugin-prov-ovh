@@ -15,5 +15,5 @@ public interface RegionalPrices {
 	 * 
 	 * @return The prices by code name.
 	 */
-	Map<String, AwsPriceRegion> getPRegions();
+	Map<String, OvhPriceRegion> getPRegions();
 }

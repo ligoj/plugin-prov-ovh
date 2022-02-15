@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwsPrices<T extends AwsRegionPrices> {
+public class OvhPrices<T extends OvhRegionPrices> {
 
 	private StorageConfig<T> config;
 

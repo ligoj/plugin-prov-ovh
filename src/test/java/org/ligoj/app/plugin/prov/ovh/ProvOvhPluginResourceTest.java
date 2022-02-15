@@ -32,11 +32,11 @@ import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
-import org.ligoj.app.plugin.prov.ovh.ProvAwsPluginResource;
-import org.ligoj.app.plugin.prov.ovh.ProvAwsTerraformService;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhTerraformService;
 import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery;
 import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery.AWS4SignatureQueryBuilder;
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsPriceImport;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
 import org.ligoj.app.plugin.prov.terraform.Context;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
@@ -48,18 +48,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Test class of {@link ProvAwsPluginResource}
+ * Test class of {@link ProvOvhPluginResource}
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-class ProvAwsPluginResourceTest extends AbstractServerTest {
+class ProvOvhPluginResourceTest extends AbstractServerTest {
 
 	private static final String MOCK_URL = "http://localhost:" + MOCK_PORT + "/mock";
 
 	@Autowired
-	private ProvAwsPluginResource resource;
+	private ProvOvhPluginResource resource;
 
 	protected int subscription;
 
@@ -81,17 +81,17 @@ class ProvAwsPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void install() throws IOException, URISyntaxException {
-		final var resource2 = new ProvAwsPluginResource();
-		resource2.priceImport = Mockito.mock(AwsPriceImport.class);
+		final var resource2 = new ProvOvhPluginResource();
+		resource2.priceImport = Mockito.mock(OvhPriceImport.class);
 		resource2.install();
 	}
 
 	@Test
 	void updateCatalog() throws IOException, URISyntaxException {
 		// Re-Install a new configuration
-		final var resource2 = new ProvAwsPluginResource();
+		final var resource2 = new ProvOvhPluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
-		resource2.priceImport = Mockito.mock(AwsPriceImport.class);
+		resource2.priceImport = Mockito.mock(OvhPriceImport.class);
 		resource2.updateCatalog("service:prov:aws:account", false);
 		resource2.updateCatalog("service:prov:aws:account", true);
 	}
@@ -108,9 +108,9 @@ class ProvAwsPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void generate() throws IOException {
-		final var resource2 = new ProvAwsPluginResource();
+		final var resource2 = new ProvOvhPluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
-		resource2.terraformService = Mockito.mock(ProvAwsTerraformService.class);
+		resource2.terraformService = Mockito.mock(ProvOvhTerraformService.class);
 		final var context = new Context();
 		context.setSubscription(em.find(Subscription.class, subscription));
 		resource2.generate(context);
@@ -118,8 +118,8 @@ class ProvAwsPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void generateSecrets() throws IOException {
-		final var resource2 = new ProvAwsPluginResource();
-		resource2.terraformService = Mockito.mock(ProvAwsTerraformService.class);
+		final var resource2 = new ProvOvhPluginResource();
+		resource2.terraformService = Mockito.mock(ProvOvhTerraformService.class);
 		resource2.generateSecrets(new Context());
 	}
 
@@ -146,8 +146,8 @@ class ProvAwsPluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("my-key", keys.get(0).getId());
 	}
 
-	private ProvAwsPluginResource newSpyResource() {
-		final var resource0 = new ProvAwsPluginResource();
+	private ProvOvhPluginResource newSpyResource() {
+		final var resource0 = new ProvOvhPluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource0);
 		return Mockito.spy(resource0);
 	}
@@ -248,6 +248,6 @@ class ProvAwsPluginResourceTest extends AbstractServerTest {
 	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
-		return getSubscription(project, ProvAwsPluginResource.KEY);
+		return getSubscription(project, ProvOvhPluginResource.KEY);
 	}
 }

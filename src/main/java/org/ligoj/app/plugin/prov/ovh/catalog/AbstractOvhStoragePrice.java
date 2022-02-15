@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class AbstractAwsStoragePrice extends AwsCsvPrice {
+public abstract class AbstractOvhStoragePrice extends OvhCsvPrice {
 
 	private String storageClass;
 	private String volumeType;

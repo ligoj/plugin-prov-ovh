@@ -3,32 +3,26 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Service price configuration.
+ * Root AWS bulk prices.
+ * 
+ * @see {@link https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/comprehend/current/index.json}
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwsPriceOffer {
+public class OvhPriceIndex {
 
 	/**
-	 * AWS all regions in one file URL.
+	 * All services.
 	 */
-	private String currentVersionUrl;
-	
-	/**
-	 * Single region index file.
-	 */
-	private String currentRegionIndexUrl;
-	
-	/**
-	 * Single region index file for savings plan.
-	 */
-	private String currentSavingsPlanIndexUrl;
-	
+	private Map<String, OvhPriceOffer> offers;
+
 }

@@ -35,6 +35,6 @@ public class UpdateContext extends AbstractUpdateContext {
 	 */
 	@Getter
 	@Setter
-	private Map<String, AwsPriceOffer> offers;
+	private Map<String, OvhPriceOffer> offers;
 
 }

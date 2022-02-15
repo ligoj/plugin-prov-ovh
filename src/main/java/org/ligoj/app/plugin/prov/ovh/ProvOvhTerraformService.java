@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
  * Service in charge of Terraform generation for AWS.
  */
 @Service
-public class ProvAwsTerraformService {
+public class ProvOvhTerraformService {
 
 	/**
 	 * Dashboard placement.
@@ -99,7 +99,7 @@ public class ProvAwsTerraformService {
 	/**
 	 * COnstructor initializing the mapping.
 	 */
-	public ProvAwsTerraformService() {
+	public ProvOvhTerraformService() {
 		// AMIs
 		mappingOsAmi.put(VmOs.SUSE, "suse-sles");
 		mappingOsAmi.put(VmOs.LINUX, "amazon");
@@ -419,9 +419,9 @@ public class ProvAwsTerraformService {
 				StandardCharsets.UTF_8)) {
 			final var parameters = subscriptionResource.getParametersNoCheck(subscription.getId());
 			out.write("access_key = \"");
-			out.write(parameters.get(ProvAwsPluginResource.PARAMETER_ACCESS_KEY_ID));
+			out.write(parameters.get(ProvOvhPluginResource.PARAMETER_ACCESS_KEY_ID));
 			out.write("\"\nsecret_key = \"");
-			out.write(parameters.get(ProvAwsPluginResource.PARAMETER_SECRET_ACCESS_KEY));
+			out.write(parameters.get(ProvOvhPluginResource.PARAMETER_SECRET_ACCESS_KEY));
 			out.write("\"\n");
 		}
 	}

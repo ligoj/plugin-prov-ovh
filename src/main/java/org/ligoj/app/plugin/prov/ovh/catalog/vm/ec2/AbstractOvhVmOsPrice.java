@@ -13,7 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class AbstractAwsVmOsPrice extends AbstractAwsVmPrice {
+public abstract class AbstractOvhVmOsPrice extends AbstractAwsVmPrice {
 
 	private String os;
 

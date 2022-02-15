@@ -3,7 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog.vm;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsCsvPrice;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhCsvPrice;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class AbstractAwsVmPrice extends AwsCsvPrice {
+public abstract class AbstractAwsVmPrice extends OvhCsvPrice {
 
 	private String offeringClass;
 	private String instanceType;

@@ -13,8 +13,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ligoj.app.plugin.prov.ovh.catalog.AbstractAwsCsvForBean;
-import org.ligoj.app.plugin.prov.ovh.catalog.AbstractAwsCsvReader;
+import org.ligoj.app.plugin.prov.ovh.catalog.AbstractOvhCsvForBean;
+import org.ligoj.app.plugin.prov.ovh.catalog.AbstractOvhCsvReader;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.AbstractAwsVmPrice;
 import org.ligoj.bootstrap.core.csv.CsvBeanReader;
 
@@ -23,7 +23,7 @@ import org.ligoj.bootstrap.core.csv.CsvBeanReader;
  *
  * @param <P> Target EC2 price type.
  */
-public abstract class AbstractCsvForBeanEc2<P extends AbstractAwsVmPrice> extends AbstractAwsCsvForBean<P> {
+public abstract class AbstractCsvForBeanEc2<P extends AbstractAwsVmPrice> extends AbstractOvhCsvForBean<P> {
 
 	/**
 	 * EC2 CSV Mapping to Java bean property
@@ -45,7 +45,7 @@ public abstract class AbstractCsvForBeanEc2<P extends AbstractAwsVmPrice> extend
 	}
 
 	/**
-	 * Build the reader parsing the CSV file from AWS to build {@link AwsEc2Price} instances. Non AWS instances data are
+	 * Build the reader parsing the CSV file from AWS to build {@link OvhEc2Price} instances. Non AWS instances data are
 	 * skipped, and headers are ignored.
 	 *
 	 * @param reader  The original AWS CSV input.
@@ -61,7 +61,7 @@ public abstract class AbstractCsvForBeanEc2<P extends AbstractAwsVmPrice> extend
 
 	@Override
 	protected CsvBeanReader<P> newCsvReader(final Reader reader, final String[] headers, final Class<P> beanType) {
-		return new AbstractAwsCsvReader<>(reader, headers, beanType) {
+		return new AbstractOvhCsvReader<>(reader, headers, beanType) {
 
 			@Override
 			protected boolean isValidRaw(final List<String> rawValues) {

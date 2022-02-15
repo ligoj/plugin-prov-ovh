@@ -33,8 +33,8 @@ import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.ovh.catalog.AbsractLocalContext;
-import org.ligoj.app.plugin.prov.ovh.catalog.AbstractAwsImport;
-import org.ligoj.app.plugin.prov.ovh.catalog.AwsPriceRegion;
+import org.ligoj.app.plugin.prov.ovh.catalog.AbstractOvhImport;
+import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceRegion;
 import org.ligoj.app.plugin.prov.ovh.catalog.UpdateContext;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractCsvForBeanEc2;
 import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.SavingsPlanPrice;
@@ -60,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public abstract class AbstractAwsPriceImportVm<T extends AbstractInstanceType, P extends AbstractTermPriceVm<T>, C extends AbstractAwsVmPrice, Q extends AbstractQuoteVm<P>, X extends AbsractLocalContext<T, P, C, Q>, R extends AbstractCsvForBeanEc2<C>>
-		extends AbstractAwsImport implements ImportCatalog<UpdateContext> {
+		extends AbstractOvhImport implements ImportCatalog<UpdateContext> {
 
 	/**
 	 * Spot term code.
@@ -652,8 +652,8 @@ public abstract class AbstractAwsPriceImportVm<T extends AbstractInstanceType, P
 	 * @param term2       The expected term name prefix alternative 2.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, isolation = Isolation.READ_UNCOMMITTED)
-	public void installRegionalPrices(final UpdateContext gContext, final AwsPriceRegion pRegion, final String api,
-			final String serviceCode, final AwsPriceRegion spRegion, final String term1, final String term2) {
+	public void installRegionalPrices(final UpdateContext gContext, final OvhPriceRegion pRegion, final String api,
+			final String serviceCode, final OvhPriceRegion spRegion, final String term1, final String term2) {
 		final var regionCode = pRegion.getRegionCode();
 		final var endpoint = getCsvUrl(gContext, pRegion.getUrl());
 		log.info("AWS {} OnDemand/Reserved import started for @{}>{} ...", api, regionCode, endpoint);
