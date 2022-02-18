@@ -5,7 +5,6 @@ package org.ligoj.app.plugin.prov.ovh;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 import java.io.IOException;
@@ -32,12 +31,7 @@ import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
-import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
-import org.ligoj.app.plugin.prov.ovh.ProvOvhTerraformService;
-import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery;
-import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery.AWS4SignatureQueryBuilder;
 import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
-import org.ligoj.app.plugin.prov.terraform.Context;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.mockito.ArgumentMatchers;
@@ -106,60 +100,10 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		}).getMessage());
 	}
 
-	@Test
-	void generate() throws IOException {
-		final var resource2 = new ProvOvhPluginResource();
-		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
-		resource2.terraformService = Mockito.mock(ProvOvhTerraformService.class);
-		final var context = new Context();
-		context.setSubscription(em.find(Subscription.class, subscription));
-		resource2.generate(context);
-	}
-
-	@Test
-	void generateSecrets() throws IOException {
-		final var resource2 = new ProvOvhPluginResource();
-		resource2.terraformService = Mockito.mock(ProvOvhTerraformService.class);
-		resource2.generateSecrets(new Context());
-	}
-
-	/**
-	 * retrieve keys from AWS
-	 *
-	 * @throws Exception exception
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	void getEC2Keys() {
-		final var resource = newSpyResource();
-		final var mockRequest = new CurlRequest("GET", MOCK_URL, null);
-		mockRequest.setSaveResponse(true);
-		Mockito.doReturn(mockRequest).when(resource).newRequest(ArgumentMatchers.any(AWS4SignatureQueryBuilder.class),
-				ArgumentMatchers.any(Map.class));
-		httpServer.stubFor(get(urlEqualTo("/mock"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<keyName>my-key</keyName>")));
-		httpServer.start();
-
-		final var keys = resource.getEC2Keys(subscription);
-		Assertions.assertFalse(keys.isEmpty());
-		Assertions.assertEquals(1, keys.size());
-		Assertions.assertEquals("my-key", keys.get(0).getId());
-	}
-
 	private ProvOvhPluginResource newSpyResource() {
 		final var resource0 = new ProvOvhPluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource0);
 		return Mockito.spy(resource0);
-	}
-
-	/**
-	 * error when we retrieve keys from AWS
-	 *
-	 * @throws Exception exception
-	 */
-	@Test
-	void getEC2KeysError() {
-		Assertions.assertTrue(resource.getEC2Keys(subscription).isEmpty());
 	}
 
 	/**
@@ -169,12 +113,10 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	void newRequest() {
-		final var request = resource.newRequest(AWS4SignatureQuery.builder().path("/").body("body").service("s3"),
-				subscription);
-		Assertions.assertTrue(request.getHeaders().containsKey("Authorization"));
+		final var request = resource.newRequest("/", subscription);
+		Assertions.assertTrue(request.getHeaders().containsKey("X-Ovh-Signature"));
 		Assertions.assertEquals("https://s3-eu-west-1.amazonaws.com/", request.getUrl());
-		Assertions.assertEquals("POST", request.getMethod());
-		Assertions.assertEquals("body", request.getContent());
+		Assertions.assertEquals("GET", request.getMethod());
 	}
 
 	@Test
@@ -222,24 +164,25 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	void checkStatus() {
 		Assertions.assertTrue(validateAccess(HttpStatus.SC_OK));
 		final var resource = newSpyResource();
-		Mockito.doReturn(MOCK_URL).when(resource).toUrl(ArgumentMatchers.any());
+		Mockito.doReturn(MOCK_URL).when(resource).toUrl(ArgumentMatchers.anyString());
 		final var parameters = new HashMap<String, String>();
-		parameters.put("service:prov:aws:access-key-id", "12345678901234567890");
-		parameters.put("service:prov:aws:secret-access-key", "abcdefghtiklmnopqrstuvwxyz");
-		parameters.put("service:prov:aws:account", "123456789");
+		parameters.put("service:prov:ovh:app-key-id", "SECRET1");
+		parameters.put("service:prov:ovh:app-secret", "SECRET2");
+		parameters.put("service:prov:ovh:consumer-key", "SECRET3");
+		parameters.put("service:prov:ovh:service-name", "SECRET4");
 		Assertions.assertTrue(resource.checkStatus(null, parameters));
 	}
 
 	@SuppressWarnings("unchecked")
 	private boolean validateAccess(int status) {
 		final var resource = newSpyResource();
-		final var mockRequest = new CurlRequest("POST", MOCK_URL, null);
+		final var mockRequest = new CurlRequest("GET", MOCK_URL, null);
 		mockRequest.setSaveResponse(true);
 		Mockito.doReturn("any").when(resource).getRegion();
-		Mockito.doReturn(mockRequest).when(resource).newRequest(ArgumentMatchers.any(AWS4SignatureQueryBuilder.class),
+		Mockito.doReturn(mockRequest).when(resource).newRequest(ArgumentMatchers.anyString(),
 				ArgumentMatchers.any(Map.class));
 
-		httpServer.stubFor(post(urlEqualTo("/mock")).willReturn(aResponse().withStatus(status)));
+		httpServer.stubFor(get(urlEqualTo("/mock")).willReturn(aResponse().withStatus(status)));
 		httpServer.start();
 		return resource.validateAccess(subscription);
 	}

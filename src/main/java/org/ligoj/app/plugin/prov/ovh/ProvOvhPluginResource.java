@@ -5,28 +5,18 @@ package org.ligoj.app.plugin.prov.ovh;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.plugin.prov.AbstractProvResource;
 import org.ligoj.app.plugin.prov.ProvResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogService;
-import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery;
-import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignerForAuthorizationHeader;
-import org.ligoj.app.plugin.prov.ovh.auth.AWS4SignatureQuery.AWS4SignatureQueryBuilder;
 import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
-import org.ligoj.app.plugin.prov.terraform.Context;
-import org.ligoj.app.plugin.prov.terraform.Terraforming;
-import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
@@ -35,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The provisioning service for AWS. There is complete quote configuration along the subscription.
+ * The provisioning service for OVH. There is complete quote configuration along the subscription.
  */
 @Service
 @Path(ProvOvhPluginResource.URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvOvhPluginResource extends AbstractProvResource implements Terraforming, ImportCatalogService {
+public class ProvOvhPluginResource extends AbstractProvResource implements ImportCatalogService {
 
 	/**
 	 * Plug-in key.
@@ -63,22 +53,25 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 	public static final String CONF_REGION = KEY + ":region";
 
 	/**
-	 * Parameter used for AWS authentication
+	 * Parameter used for OVH authentication
 	 */
-	public static final String PARAMETER_ACCESS_KEY_ID = KEY + ":access-key-id";
+	public static final String PARAMETER_APP_KEY = KEY + ":app-key-id";
 
 	/**
-	 * Parameter used for AWS authentication
+	 * Parameter used for OVH authentication
 	 */
-	public static final String PARAMETER_SECRET_ACCESS_KEY = KEY + ":secret-access-key";
+	public static final String PARAMETER_APP_SECRET = KEY + ":app-secret";
 
 	/**
-	 * AWS Account Id.
+	 * OVH Consumer key
 	 */
-	public static final String PARAMETER_ACCOUNT = KEY + ":account";
+	public static final String PARAMETER_CONSUMER_KEY = KEY + ":consumer-key";
+	/**
+	 * OVH Service Name
+	 */
+	public static final String PARAMETER_SERVICE_NAME = KEY + ":service-name";
 
-	@Autowired
-	private AWS4SignerForAuthorizationHeader signer;
+	public static final String ENDPOINT = "https://eu.api.ovh.com/1.0";
 
 	@Autowired
 	private ConfigurationResource configuration;
@@ -95,11 +88,11 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 	}
 
 	/**
-	 * Check AWS connection and account.
+	 * Check OVH connection and account.
 	 *
 	 * @param node       The node identifier. May be <code>null</code>.
 	 * @param parameters the parameter values of the node.
-	 * @return <code>true</code> if AWS connection is up
+	 * @return <code>true</code> if OVH connection is up
 	 */
 	@Override
 	public boolean checkStatus(final String node, final Map<String, String> parameters) {
@@ -109,7 +102,7 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 	@Override
 	public void create(final int subscription) {
 		if (!validateAccess(subscription)) {
-			throw new BusinessException("Cannot access to AWS services with these parameters");
+			throw new BusinessException("Cannot access to OVH services with these parameters");
 		}
 	}
 
@@ -125,7 +118,7 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 	}
 
 	/**
-	 * Fetch the prices from the AWS server. Install or update the prices
+	 * Fetch the prices from the OVH server. Install or update the prices
 	 */
 	@Override
 	public void install() throws IOException, URISyntaxException {
@@ -134,83 +127,46 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 
 	@Override
 	public void updateCatalog(final String node, final boolean force) throws IOException, URISyntaxException {
-		// AWS catalog is shared with all instances, require tool level access
+		// OVH catalog is shared with all instances, require tool level access
 		nodeResource.checkWritableNode(KEY);
 		priceImport.install(force);
 	}
 
-	@Override
-	public void generate(final Context context) throws IOException {
-		terraformService.write(context);
-	}
-
 	/**
-	 * Return EC2 key names.
+	 * Create Curl request for OVH service. Initialize default values for OVH secrets and compute signature.
 	 *
-	 * @param subscription The related subscription.
-	 * @return EC2 keys related to given subscription.
-	 */
-	@Path("ec2/keys/{subscription:\\d+}")
-	@GET
-	public List<NamedBean<String>> getEC2Keys(@PathParam("subscription") final int subscription) {
-		// Call "DescribeKeyPairs" service
-		final var query = "Action=DescribeKeyPairs&Version=2016-11-15";
-		final var builder = AWS4SignatureQuery.builder().service("ec2").region(getRegion()).path("/").body(query);
-		final var request = newRequest(builder, subscription);
-		// extract key pairs from response
-		final var keys = new ArrayList<NamedBean<String>>();
-		try (var curlProcessor = new CurlProcessor()) {
-			if (curlProcessor.process(request)) {
-				final var keyNames = Pattern.compile("<keyName>(.*)</keyName>").matcher(request.getResponse());
-				while (keyNames.find()) {
-					keys.add(new NamedBean<>(keyNames.group(1), null));
-				}
-			}
-		}
-		return keys;
-	}
-
-	/**
-	 * Create Curl request for AWS service. Initialize default values for awsAccessKey, awsSecretKey and regionName and
-	 * compute signature.
-	 *
-	 * @param builder      {@link AWS4SignatureQueryBuilder} initialized with values used for this call (headers,
-	 *                     parameters, host, ...)
 	 * @param subscription Subscription's identifier.
 	 * @return initialized request
 	 */
-	protected CurlRequest newRequest(final AWS4SignatureQueryBuilder builder, final int subscription) {
-		return newRequest(builder, subscriptionResource.getParameters(subscription));
+	protected CurlRequest newRequest(final String query, final int subscription) {
+		return newRequest(toUrl(query), subscriptionResource.getParameters(subscription));
 	}
 
 	/**
-	 * Create Curl request for AWS service. Initialize default values for awsAccessKey, awsSecretKey and regionName and
-	 * compute signature.
+	 * Create Curl request for OVH service. Initialize default values for OVH secrets and compute signature.
 	 *
-	 * @param builder    {@link AWS4SignatureQueryBuilder} initialized with values used for this call (headers,
-	 *                   parameters, host, ...)
 	 * @param parameters Subscription's parameters.
 	 * @return Initialized request.
 	 */
-	protected CurlRequest newRequest(final AWS4SignatureQueryBuilder builder, final Map<String, String> parameters) {
-		final var query = builder.accessKey(parameters.get(PARAMETER_ACCESS_KEY_ID))
-				.secretKey(parameters.get(PARAMETER_SECRET_ACCESS_KEY)).region(getRegion()).build();
-		final var authorization = signer.computeSignature(query);
-		final var request = new CurlRequest(query.getMethod(), toUrl(query), query.getBody());
-		request.getHeaders().putAll(query.getHeaders());
-		request.getHeaders().put("Authorization", authorization);
+	protected CurlRequest newRequest(final String query, final Map<String, String> parameters) {
+		final var appKey = parameters.get(PARAMETER_APP_KEY);
+		final var appSecret = parameters.get(PARAMETER_APP_SECRET);
+		final var consumerKey = parameters.get(PARAMETER_CONSUMER_KEY);
+		final var method = "GET";
+		final var body = "";
+
+		final var timestamp = System.currentTimeMillis() / 1000;
+
+		// build signature
+		final var toSign = new StringBuilder(appSecret).append("+").append(consumerKey).append("+").append(method)
+				.append("+").append(query).append("+").append(body).append("+").append(timestamp).toString();
+		final var signature = new StringBuilder("$1$").append(DigestUtils.sha1Hex(toSign)).toString();
+		final var request = new CurlRequest(method, query, body);
+		request.getHeaders()
+				.putAll(Map.of("Content-Type", "application/json", "X-Ovh-Application", appKey, "X-Ovh-Consumer",
+						consumerKey, "X-Ovh-Signature", signature, "X-Ovh-Timestamp", Long.toString(timestamp)));
 		request.setSaveResponse(true);
 		return request;
-	}
-
-	/**
-	 * Return the URL from a query.
-	 *
-	 * @param query Source {@link AWS4SignatureQuery}
-	 * @return The base host URL from a query.
-	 */
-	protected String toUrl(final AWS4SignatureQuery query) {
-		return "https://" + query.getHost() + query.getPath();
 	}
 
 	/**
@@ -223,37 +179,40 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Terra
 	}
 
 	/**
-	 * Check AWS connection and account.
+	 * Check OVH connection and account.
 	 *
 	 * @param parameters Subscription parameters.
-	 * @return <code>true</code> if AWS connection is up
+	 * @return <code>true</code> if OVH connection is up
 	 */
 	private boolean validateAccess(final Map<String, String> parameters) {
-		// Call STS GetCallerIdentity
-		final var query = "Action=GetCallerIdentity&Version=2011-06-15";
-		final var builder = AWS4SignatureQuery.builder().service("sts").path("/").body(query);
+		final var query = "/cloud/project/project";
 		try (var curlProcessor = new CurlProcessor()) {
-			return curlProcessor.process(newRequest(builder, parameters));
+			return curlProcessor.process(newRequest(query, parameters));
 		}
 	}
 
 	/**
-	 * Check AWS connection and account.
+	 * Return the full URL from a query.
+	 *
+	 * @param query Target remote query.
+	 * @return The base host URL from a query.
+	 */
+	protected String toUrl(final String query) {
+		return ENDPOINT + query;
+	}
+
+	/**
+	 * Check OVH connection and account.
 	 *
 	 * @param subscription Subscription identifier.
-	 * @return <code>true</code> if AWS connection is up
+	 * @return <code>true</code> if OVH connection is up
 	 */
 	public boolean validateAccess(final int subscription) {
-		// Call STS GetCallerIdentity
-		final var query = "Action=GetCallerIdentity&Version=2011-06-15";
-		final var builder = AWS4SignatureQuery.builder().service("sts").path("/").body(query);
+		final var parameters = subscriptionResource.getParameters(subscription);
+		final var query = "/cloud/project/" + parameters.get(PARAMETER_SERVICE_NAME) + "/region";
 		try (var curlProcessor = new CurlProcessor()) {
-			return curlProcessor.process(newRequest(builder, subscription));
+			return curlProcessor.process(newRequest(query, subscription));
 		}
 	}
 
-	@Override
-	public void generateSecrets(final Context context) throws IOException {
-		terraformService.writeSecrets(context.getSubscription());
-	}
 }

@@ -3,8 +3,6 @@
  */
 package org.ligoj.app.plugin.prov.ovh;
 
-import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
-
 /**
  * Configuration class used to mock AWS calls
  */
