@@ -1,5 +1,5 @@
 parameter.id;data;node.id;subscription.id!
-service:prov:ovh:app-key-id;s6Ue3B8xqzWKci5lG6cjyAlKmxFnUFYX;service:prov:ovh:test;1
-service:prov:ovh:app-secret;I9h6cZkfmrTZiMHQcT9Rt1qEtiadNdgn;service:prov:ovh:test;1
-service:prov:ovh:consumer-key;oaTG24PemmFX3BBp;service:prov:ovh:test;1
-service:prov:ovh:service-name;e8dfc29e4bd74b239318ca5b715459de;service:prov:ovh:test;1
+service:prov:ovh:app-key-id;SECRET;service:prov:ovh:test;1
+service:prov:ovh:app-secret;SECRET;service:prov:ovh:test;1
+service:prov:ovh:consumer-key;SECRET;service:prov:ovh:test;1
+service:prov:ovh:service-name;SECRET;service:prov:ovh:test;1
