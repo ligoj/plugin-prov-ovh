@@ -2,3 +2,4 @@ id;owner.id;data;mandatory;type;secured
 service:prov:ovh:app-key-id;service:prov:ovh;{"pattern":"\\w{32}"};false;TEXT
 service:prov:ovh:app-secret;service:prov:ovh;{"pattern":"\\w{32}"};true;TEXT;true
 service:prov:ovh:consumer-key;service:prov:ovh;{"pattern":"\\w{16}"};false;TEXT
+service:prov:ovh:service-name;service:prov:ovh;{"pattern":"\\w{32}"};false;TEXT
