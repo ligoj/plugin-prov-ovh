@@ -64,9 +64,9 @@ import org.ligoj.app.plugin.prov.model.ProvUsage;
 import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.CsvForBeanEc2;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhEc2Price;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhPriceImportEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.CsvForBeanEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.OvhEc2Price;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.OvhPriceImportInstance;
 import org.ligoj.app.plugin.prov.quote.container.ProvQuoteContainerResource;
 import org.ligoj.app.plugin.prov.quote.container.QuoteContainerQuery;
 import org.ligoj.app.plugin.prov.quote.database.ProvQuoteDatabaseResource;
@@ -170,16 +170,16 @@ class OvhPriceImportTest extends AbstractServerTest {
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(helper);
 		this.resource = initCatalog(helper, new OvhPriceImport());
 		this.resource.setBase(initCatalog(helper, new OvhPriceImportBase()));
-		this.resource.setEc2(initCatalog(helper, new OvhPriceImportEc2() {
+		this.resource.setEc2(initCatalog(helper, new OvhPriceImportInstance() {
 			@Override
-			public OvhPriceImportEc2 newProxy() {
+			public OvhPriceImportInstance newProxy() {
 				return this;
 			}
 
 		}));
 		configuration.put(ProvResource.USE_PARALLEL, "0");
 		configuration.put(CONF_URL_AWS_PRICES, "http://localhost:" + MOCK_PORT);
-		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
+		configure(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
 
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
@@ -217,7 +217,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	@Test
 	void dummyCoverage() throws IOException {
 		new OvhEc2Price().getDrop();
-		new OvhPriceImportEc2().newProxy();
+		new OvhPriceImportInstance().newProxy();
 	}
 
 	/**
@@ -453,7 +453,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 		// Point to another catalog with updated prices
 		mockServices("-v2");
-		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/v2/spot.js");
+		configure(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT, "/v2/spot.js");
 
 		// Install the new catalog, update/deletion occurs
 		// Code 'HF7N6NNE7N8GDMBE' and '000000000000_NEW' are deleted
@@ -570,12 +570,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 	@Test
 	void installOnLine() throws Exception {
 		configuration.delete(CONF_URL_AWS_PRICES);
-		configuration.delete(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT);
+		configuration.delete(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT);
 		configuration.put(OvhPriceImportBase.CONF_REGIONS, "eu-west-1"); // Only one region for UTs
-		configuration.put(OvhPriceImportEc2.CONF_OS, "LINUX"); // Only one OS for UTs
+		configuration.put(OvhPriceImportInstance.CONF_OS, "LINUX"); // Only one OS for UTs
 
 		// Only "r4.large" and "t2.*","i.*,c1" for UTs
-		configuration.put(OvhPriceImportEc2.CONF_ITYPE, "(r4|t2|i1|c1)\\..*");
+		configuration.put(OvhPriceImportInstance.CONF_ITYPE, "(r4|t2|i1|c1)\\..*");
 
 		// Aligned to :
 		// https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/
@@ -764,7 +764,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	@Test
 	void installSpotEmpty() throws Exception {
 		mockAll();
-		configure(OvhPriceImportEc2.CONF_URL_EC2_PRICES_SPOT, "/any.js");
+		configure(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT, "/any.js");
 		mock("/spot-fargate.json", "mock-server/aws/spot-fargate-empty.json");
 		mock("/spot.json", "mock-server/aws/spot-empty.js");
 		startMockServer();

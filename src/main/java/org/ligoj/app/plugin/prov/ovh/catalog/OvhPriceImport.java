@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhPriceImportEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.OvhPriceImportInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private OvhPriceImportBase base;
 
 	@Autowired
-	private OvhPriceImportEc2 ec2;
+	private OvhPriceImportInstance instance;
 
 	/**
 	 * Install or update prices.
@@ -38,7 +38,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		final var context = initContext(new UpdateContext(), ProvOvhPluginResource.KEY, force);
 
 		base.install(context);
-		ec2.install(context);
+		instance.install(context);
 		context.cleanup();
 	}
 }

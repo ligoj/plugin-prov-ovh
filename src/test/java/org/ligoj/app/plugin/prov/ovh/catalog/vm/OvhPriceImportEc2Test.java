@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.OvhPriceImportEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.OvhPriceImportInstance;
 
 /**
- * Test class of {@link OvhPriceImportEc2}
+ * Test class of {@link OvhPriceImportInstance}
  */
 class OvhPriceImportEc2Test {
 
 	@Test
 	void getOnDemandCode() {
-		Assertions.assertNull(new OvhPriceImportEc2().getOnDemandCode(new HashMap<String, ProvInstancePrice>()));
+		Assertions.assertNull(new OvhPriceImportInstance().getOnDemandCode(new HashMap<String, ProvInstancePrice>()));
 		var term1 = new ProvInstancePriceTerm();
 		term1.setName("Reserved");
 		var term2 = new ProvInstancePriceTerm();
@@ -30,10 +30,10 @@ class OvhPriceImportEc2Test {
 		var price2 = new ProvInstancePrice();
 		price2.setCode("2");
 		price2.setTerm(term2);
-		Assertions.assertNull(new OvhPriceImportEc2().getOnDemandCode(Map.of("A", price1, "B", price2)));
+		Assertions.assertNull(new OvhPriceImportInstance().getOnDemandCode(Map.of("A", price1, "B", price2)));
 		price1.setCode("1.2.3");
-		Assertions.assertNull(new OvhPriceImportEc2().getOnDemandCode(Map.of("A", price1, "B", price2)));
+		Assertions.assertNull(new OvhPriceImportInstance().getOnDemandCode(Map.of("A", price1, "B", price2)));
 		price2.setCode("4.5.6");
-		Assertions.assertEquals(".5.6", new OvhPriceImportEc2().getOnDemandCode(Map.of("A", price1, "B", price2)));
+		Assertions.assertEquals(".5.6", new OvhPriceImportInstance().getOnDemandCode(Map.of("A", price1, "B", price2)));
 	}
 }

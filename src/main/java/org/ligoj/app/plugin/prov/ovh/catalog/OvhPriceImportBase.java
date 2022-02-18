@@ -39,9 +39,9 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 	/**
 	 * Path to root bulk price index.
 	 */
-	public static final String AWS_PRICES_PATH = "/offers/v1.0/aws/index.json";
+	public static final String OVH_PRICES_PATH = "/price";
 
-	private static final String AWS_PRICES_BASE = "https://pricing.us-east-1.amazonaws.com";
+	private static final String AWS_PRICES_BASE = ProvOvhPluginResource.ENDPOINT + "/cloud";
 
 	/**
 	 * Configuration key used for AWS URL prices.
@@ -51,7 +51,7 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 	/**
 	 * Configuration key used for {@link #AWS_PRICES_BASE}
 	 */
-	public static final String CONF_URL_AWS_PRICES = String.format(CONF_URL_TMP_PRICES, "aws");
+	public static final String CONF_URL_AWS_PRICES = String.format(CONF_URL_TMP_PRICES, "ovh");
 
 	private static final TypeReference<Map<String, ProvLocation>> MAP_LOCATION = new TypeReference<>() {
 		// Nothing to extend
@@ -61,7 +61,7 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 	public void install(final UpdateContext context) throws IOException {
 		importCatalogResource.nextStep(context.getNode().getId(), t -> t.setPhase("region"));
 		context.setValidRegion(Pattern.compile(configuration.get(CONF_REGIONS, ".*")));
-		context.getMapRegionById().putAll(toMap("aws-regions.json", MAP_LOCATION));
+		context.getMapRegionById().putAll(toMap("ovh-regions.json", MAP_LOCATION));
 
 		// Complete the by-name map
 		context.getMapStorageToApi().putAll(toMap("storage-to-api.json", MAP_STR));
@@ -87,7 +87,7 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 	private void loadBaseIndex(final UpdateContext context) throws IOException {
 		final var basePrice = configuration.get(CONF_URL_AWS_PRICES, AWS_PRICES_BASE);
 		context.setBaseUrl(basePrice);
-		final var baseUrl = basePrice + AWS_PRICES_PATH;
+		final var baseUrl = basePrice + OVH_PRICES_PATH;
 		log.info("AWS {} import: download root index {}", "lambda", baseUrl);
 		try (var reader = new BufferedReader(new InputStreamReader(new URL(baseUrl).openStream()))) {
 			context.setOffers(objectMapper.readValue(reader, OvhPriceIndex.class).getOffers());

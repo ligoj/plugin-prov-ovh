@@ -7,8 +7,8 @@ import org.ligoj.app.plugin.prov.model.AbstractInstanceType;
 import org.ligoj.app.plugin.prov.model.AbstractQuoteVmOs;
 import org.ligoj.app.plugin.prov.model.AbstractTermPriceVmOs;
 import org.ligoj.app.plugin.prov.ovh.catalog.AbsractLocalContext;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractOvhVmOsPrice;
-import org.ligoj.app.plugin.prov.ovh.catalog.vm.ec2.AbstractCsvForBeanEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.AbstractCsvForBeanEc2;
+import org.ligoj.app.plugin.prov.ovh.catalog.vm.instance.AbstractOvhVmOsPrice;
 
 /**
  * The compute part of AWS catalog import.
