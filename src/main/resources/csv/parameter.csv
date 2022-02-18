@@ -1,4 +1,4 @@
 id;owner.id;data;mandatory;type;secured
-service:prov:ovh:access-key-id;service:prov:ovh;{"pattern":"\\w{16,128}"};true;TEXT
-service:prov:ovh:secret-access-key;service:prov:ovh;{"pattern":".{20,}"};true;TEXT;true
-service:prov:ovh:account;service:prov:ovh;;true;TEXT
+service:prov:ovh:app-key-id;service:prov:ovh;{"pattern":"\\w{32}"};false;TEXT
+service:prov:ovh:app-secret;service:prov:ovh;{"pattern":"\\w{32}"};true;TEXT;true
+service:prov:ovh:consumer-key;service:prov:ovh;{"pattern":"\\w{16}"};false;TEXT

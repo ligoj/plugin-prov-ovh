@@ -1,4 +1,4 @@
 parameter.id;data;node.id;subscription.id!
-service:prov:ovh:access-key-id;12345678901234567890;service:prov:ovh:test;1
-service:prov:ovh:secret-access-key;abcdefghtiklmnopqrstuvwxyz;service:prov:ovh:test;1
-service:prov:ovh:account;123456789;service:prov:ovh:test;1
+service:prov:ovh:app-key-id;SECRET;service:prov:ovh:test;1
+service:prov:ovh:app-secret;SECRET;service:prov:ovh:test;1
+service:prov:ovh:consumer-key;SECRET;service:prov:ovh:test;1
