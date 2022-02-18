@@ -178,7 +178,6 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		final var resource = newSpyResource();
 		final var mockRequest = new CurlRequest("GET", MOCK_URL, null);
 		mockRequest.setSaveResponse(true);
-		Mockito.doReturn("any").when(resource).getRegion();
 		Mockito.doReturn(mockRequest).when(resource).newRequest(ArgumentMatchers.anyString(),
 				ArgumentMatchers.any(Map.class));
 

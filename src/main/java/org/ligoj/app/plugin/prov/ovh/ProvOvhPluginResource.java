@@ -20,7 +20,6 @@ import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
-import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +40,6 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	 * Plug-in key.
 	 */
 	public static final String KEY = URL.replace('/', ':').substring(1);
-
-	/**
-	 * The default region, fixed for now.
-	 */
-	private static final String DEFAULT_REGION = "eu-west-1";
 
 	/**
 	 * Configuration key used for {@link #DEFAULT_REGION}
@@ -72,9 +66,6 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	public static final String PARAMETER_SERVICE_NAME = KEY + ":service-name";
 
 	public static final String ENDPOINT = "https://eu.api.ovh.com/1.0";
-
-	@Autowired
-	private ConfigurationResource configuration;
 
 	@Autowired
 	protected OvhPriceImport priceImport;
@@ -164,15 +155,6 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 						consumerKey, "X-Ovh-Signature", signature, "X-Ovh-Timestamp", Long.toString(timestamp)));
 		request.setSaveResponse(true);
 		return request;
-	}
-
-	/**
-	 * Return the default region for this plug-in.
-	 *
-	 * @return the default region.
-	 */
-	protected String getRegion() {
-		return configuration.get(CONF_REGION, DEFAULT_REGION);
 	}
 
 	/**
