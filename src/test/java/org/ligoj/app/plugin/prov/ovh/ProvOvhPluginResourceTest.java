@@ -70,7 +70,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void getKey() {
-		Assertions.assertEquals("service:prov:aws", resource.getKey());
+		Assertions.assertEquals("service:prov:ovh", resource.getKey());
 	}
 
 	@Test
@@ -86,8 +86,8 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		final var resource2 = new ProvOvhPluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
 		resource2.priceImport = Mockito.mock(OvhPriceImport.class);
-		resource2.updateCatalog("service:prov:aws:account", false);
-		resource2.updateCatalog("service:prov:aws:account", true);
+		resource2.updateCatalog("service:prov:ovh:account", false);
+		resource2.updateCatalog("service:prov:ovh:account", true);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 
 		// Re-Install a new configuration
 		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.updateCatalog("service:prov:aws:account", false);
+			resource.updateCatalog("service:prov:ovh:account", false);
 		}).getMessage());
 	}
 
@@ -115,7 +115,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	void newRequest() {
 		final var request = resource.newRequest("/", subscription);
 		Assertions.assertTrue(request.getHeaders().containsKey("X-Ovh-Signature"));
-		Assertions.assertEquals("https://s3-eu-west-1.amazonaws.com/", request.getUrl());
+		Assertions.assertEquals("https://eu.api.ovh.com/1.0/", request.getUrl());
 		Assertions.assertEquals("GET", request.getMethod());
 	}
 
@@ -130,7 +130,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	void createFailed() {
 		final var resource = newSpyResource();
 		Mockito.doReturn(false).when(resource).validateAccess(ArgumentMatchers.anyInt());
-		Assertions.assertEquals("Cannot access to AWS services with these parameters",
+		Assertions.assertEquals("Cannot access to OVH services with these parameters",
 				Assertions.assertThrows(BusinessException.class, () -> {
 					resource.create(-1);
 				}).getMessage());

@@ -79,9 +79,6 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	@Autowired
 	protected OvhPriceImport priceImport;
 
-	@Autowired
-	protected ProvOvhTerraformService terraformService;
-
 	@Override
 	public String getKey() {
 		return KEY;
@@ -185,9 +182,9 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	 * @return <code>true</code> if OVH connection is up
 	 */
 	private boolean validateAccess(final Map<String, String> parameters) {
-		final var query = "/cloud/project/project";
+		final var query = "/cloud/project";
 		try (var curlProcessor = new CurlProcessor()) {
-			return curlProcessor.process(newRequest(query, parameters));
+			return curlProcessor.process(newRequest(toUrl(query), parameters));
 		}
 	}
 
