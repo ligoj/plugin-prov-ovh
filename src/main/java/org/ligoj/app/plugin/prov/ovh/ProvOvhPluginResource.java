@@ -194,4 +194,7 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 		}
 	}
 
-}
+	@Override
+	public String getName() {
+		return "OVH";
+	}}
