@@ -84,6 +84,11 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
+	void getName() {
+		Assertions.assertEquals("OVH", resource.getName());
+	}
+
+	@Test
 	void install() throws IOException, URISyntaxException {
 		final var resource2 = new ProvOvhPluginResource();
 		resource2.priceImport = Mockito.mock(OvhPriceImport.class);

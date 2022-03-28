@@ -195,4 +195,8 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 			return curlProcessor.process(newRequest(query, subscription));
 		}
 	}
-}
+
+	@Override
+	public String getName() {
+		return "OVH";
+	}}
