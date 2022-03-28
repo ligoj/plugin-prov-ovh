@@ -170,19 +170,19 @@ class OvhPriceImportTest extends AbstractServerTest {
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(helper);
 		this.resource = initCatalog(helper, new OvhPriceImport());
 		this.resource.setBase(initCatalog(helper, new OvhPriceImportBase()));
-		this.resource.setEc2(initCatalog(helper, new OvhPriceImportInstance() {
-			@Override
-			public OvhPriceImportInstance newProxy() {
-				return this;
-			}
+		//	this.resource.setEc2(initCatalog(helper, new OvhPriceImportInstance() {
+			//		@Override
+			//		public OvhPriceImportInstance newProxy() {
+			//		return this;
+				//		}
 
-		}));
-		configuration.put(ProvResource.USE_PARALLEL, "0");
-		configuration.put(CONF_URL_AWS_PRICES, "http://localhost:" + MOCK_PORT);
-		configure(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
+			//	}));
+		//	configuration.put(ProvResource.USE_PARALLEL, "0");
+		//	configuration.put(CONF_URL_AWS_PRICES, "http://localhost:" + MOCK_PORT);
+		//	configure(OvhPriceImportInstance.CONF_URL_EC2_PRICES_SPOT, "/spot.js");
 
-		initSpringSecurityContext(DEFAULT_USER);
-		resetImportTask();
+		//	initSpringSecurityContext(DEFAULT_USER);
+		//	resetImportTask();
 	}
 
 	private <T extends AbstractImportCatalogResource> T initCatalog(ImportCatalogResource importHelper, T catalog) {
