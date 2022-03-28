@@ -49,23 +49,25 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	/**
 	 * Parameter used for OVH authentication
 	 */
-	public static final String PARAMETER_APP_KEY = KEY + ":app-key-id";
+	public static final String PARAMETER_APP_KEY = KEY +":app-key-id";
 
 	/**
 	 * Parameter used for OVH authentication
 	 */
-	public static final String PARAMETER_APP_SECRET = KEY + ":app-secret";
+	public static final String PARAMETER_APP_SECRET = KEY +":app-secret";
 
 	/**
 	 * OVH Consumer key
 	 */
-	public static final String PARAMETER_CONSUMER_KEY = KEY + ":consumer-key";
+	public static final String PARAMETER_CONSUMER_KEY = KEY +":consumer-key";
 	/**
 	 * OVH Service Name
 	 */
-	public static final String PARAMETER_SERVICE_NAME = KEY + ":service-name";
+	public static final String PARAMETER_SERVICE_NAME =  KEY +":service-name";
 
 	public static final String ENDPOINT = "https://eu.api.ovh.com/1.0";
+	
+	public static final String OVH_FLAVORS = ENDPOINT+"/cloud/project"+PARAMETER_SERVICE_NAME+"/flavor";
 
 	@Autowired
 	protected OvhPriceImport priceImport;

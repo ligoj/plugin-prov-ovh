@@ -1,5 +1,5 @@
 {
-"projectCreation":{"value":10,"currencyCode":"EUR"},
+"projectCreation":[{"value":10,"currencyCode":"EUR"}],
 
 "storage":[
     {"region":"GRA7","price":{"currencyCode":"EUR","value":2e-05},"monthlyPrice":{"currencyCode":"EUR","value":0.01}},

@@ -7,17 +7,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalog;
 import org.ligoj.app.plugin.prov.model.AbstractCodedEntity;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
 import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
 import org.ligoj.bootstrap.core.INamableBean;
+import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -40,7 +43,13 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 	 * Path to root bulk price index.
 	 */
 	public static final String OVH_PRICES_PATH = "/price";
-
+	
+	//public static final String OVH_FLAVORS = ProvOvhPluginResource.ENDPOINT+"/cloud/project"+ProvOvhPluginResource.PARAMETER_SERVICE_NAME+"/flavor";
+	//public static final String OVH_FLAVORS = ProvOvhPluginResource.KEY + ":flavor";
+	public static final String OVH_FLAVORS = ProvOvhPluginResource.OVH_FLAVORS;
+	
+	public static final String OVH_REGIONS = ProvOvhPluginResource.ENDPOINT+"/cloud/project"+ProvOvhPluginResource.PARAMETER_SERVICE_NAME+"/region";
+	
 	private static final String AWS_PRICES_BASE = ProvOvhPluginResource.ENDPOINT + "/cloud";
 
 	/**
@@ -59,6 +68,7 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 
 	@Override
 	public void install(final UpdateContext context) throws IOException {
+		
 		importCatalogResource.nextStep(context.getNode().getId(), t -> t.setPhase("region"));
 		context.setValidRegion(Pattern.compile(configuration.get(CONF_REGIONS, ".*")));
 		context.getMapRegionById().putAll(toMap("ovh-regions.json", MAP_LOCATION));
@@ -79,8 +89,27 @@ public class OvhPriceImportBase extends AbstractOvhImport implements ImportCatal
 		context.getMapSpotToNewRegion().putAll(toMap("spot-to-new-region.json", MAP_STR));
 		loadBaseIndex(context);
 		nextStep(context, "region");
+		
+		
 	}
-
+	
+	
+	public OvhAllPrices getPrices() throws IOException {
+		try (var curl = new CurlProcessor()) {
+			final var rawJson = StringUtils.defaultString(curl.get(OVH_FLAVORS), "{}");
+			final var prices = objectMapper.readValue(rawJson, OvhAllPrices.class);
+			return prices ;
+			}
+	}
+	
+	public OvhRegions getRegions() throws IOException {
+		try (var curl = new CurlProcessor()) {
+			final var rawJson = StringUtils.defaultString(curl.get("http://localhost:8120/regions"), "{}");
+			final var regions = objectMapper.readValue(rawJson, OvhRegions.class);
+			return regions;
+			}
+	}
+	
 	/**
 	 * Get the root AWS bulk index file and save it in the context.
 	 */
