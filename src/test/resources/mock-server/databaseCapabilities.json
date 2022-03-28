@@ -1,0 +1,155 @@
+{
+    "engines": [
+        {
+            "name": "mongodb",
+            "versions": [
+                "4.4",
+                "5.0",
+                "4.2"
+            ],
+            "defaultVersion": "5.0",
+            "description": "document-based database management system",
+            "sslModes": [
+                "required"
+            ]
+        },
+        {
+            "name": "mysql",
+            "versions": [
+                "8"
+            ],
+            "defaultVersion": "8",
+            "description": "relational database management system",
+            "sslModes": [
+                "REQUIRED"
+            ]
+        },
+        {
+            "name": "postgresql",
+            "versions": [
+                "12",
+                "13",
+                "14",
+                "10",
+                "11"
+            ],
+            "defaultVersion": "14",
+            "description": "object-relational database management system",
+            "sslModes": [
+                "require"
+            ]
+        },
+        {
+            "name": "kafka",
+            "versions": [
+                "2.8",
+                "3.0"
+            ],
+            "defaultVersion": "3.0",
+            "description": "high-throughput distributed messaging system",
+            "sslModes": [
+                "TLS/SSL"
+            ]
+        },
+        {
+            "name": "redis",
+            "versions": [
+                "6.2"
+            ],
+            "defaultVersion": "6.2",
+            "description": "in-memory data structure store",
+            "sslModes": [
+                "TLS/SSL"
+            ]
+        },
+        {
+            "name": "opensearch",
+            "versions": [
+                "1"
+            ],
+            "defaultVersion": "1",
+            "description": "real time search & analyse management system",
+            "sslModes": [
+                "https"
+            ]
+        },
+        {
+            "name": "kafkaMirrorMaker",
+            "versions": [
+                "2"
+            ],
+            "defaultVersion": "2",
+            "description": "data replication between kafka databases.",
+            "sslModes": [
+                "n/a"
+            ]
+        }
+    ],
+    "plans": [
+        {
+            "name": "essential",
+            "description": "Essential plan",
+            "backupRetention": "P2D"
+        },
+        {
+            "name": "business",
+            "description": "Business plan",
+            "backupRetention": "P7D"
+        },
+        {
+            "name": "enterprise",
+            "description": "Enterprise plan",
+            "backupRetention": "P30D"
+        }
+    ],
+    "flavors": [
+        {
+            "name": "db1-7",
+            "core": 2,
+            "memory": 7,
+            "storage": 50
+        },
+        {
+            "name": "db1-2",
+            "core": 1,
+            "memory": 2,
+            "storage": 25
+        },
+        {
+            "name": "db1-4",
+            "core": 2,
+            "memory": 4,
+            "storage": 50
+        },
+        {
+            "name": "db1-15",
+            "core": 4,
+            "memory": 15,
+            "storage": 100
+        },
+        {
+            "name": "db1-30",
+            "core": 8,
+            "memory": 30,
+            "storage": 200
+        },
+        {
+            "name": "db1-60",
+            "core": 16,
+            "memory": 60,
+            "storage": 400
+        },
+        {
+            "name": "db1-120",
+            "core": 32,
+            "memory": 120,
+            "storage": 800
+        }
+    ],
+    "options": [
+        {
+            "name": "databaseName",
+            "type": "string"
+        }
+    ]
+}
