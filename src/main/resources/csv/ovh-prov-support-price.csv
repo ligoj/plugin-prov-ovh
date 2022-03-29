@@ -1,0 +1,5 @@
+code;type.name;min;rate;limit
+ovh-standard;Standard;0;0;
+ovh-premium;Premium;56;0;
+ovh-business;Business;300;10;
+ovh-enterprise;Enterprise;5850;30;

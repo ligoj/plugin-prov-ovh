@@ -1,0 +1,218 @@
+[
+    {
+        "id": "e9e90064-01cb-47f3-a9b1-c46380d5bdb7",
+        "name": "b2-120",
+        "region": "SBG5",
+        "ram": 120000,
+        "disk": 400,
+        "vcpus": 32,
+        "type": "ovh.ssd.eg",
+        "osType": "linux",
+        "inboundBandwidth": 10000,
+        "outboundBandwidth": 10000,
+        "available": true,
+        "planCodes": {
+            "monthly": "b2-120.monthly.postpaid",
+            "hourly": "b2-120.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            },
+            {
+                "name": "resize",
+                "enabled": true
+            }
+        ],
+        "quota": 0
+    },
+    {
+        "id": "d5acc03f-46cb-410b-821b-baadc550348e",
+        "name": "win-r2-15-flex",
+        "region": "SBG5",
+        "ram": 15000,
+        "disk": 50,
+        "vcpus": 2,
+        "type": "ovh.ssd.ram",
+        "osType": "windows",
+        "inboundBandwidth": 250,
+        "outboundBandwidth": 250,
+        "available": true,
+        "planCodes": {
+            "monthly": "win-r2-15.monthly.postpaid",
+            "hourly": "win-r2-15.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            }
+        ],
+        "quota": 2
+    },
+    {
+        "id": "fc8c7a4b-aa5c-4b7c-8a97-287eec05c5ed",
+        "name": "c2-7",
+        "region": "SBG5",
+        "ram": 7000,
+        "disk": 50,
+        "vcpus": 2,
+        "type": "ovh.ssd.cpu",
+        "osType": "linux",
+        "inboundBandwidth": 250,
+        "outboundBandwidth": 250,
+        "available": true,
+        "planCodes": {
+            "monthly": "c2-7.monthly.postpaid",
+            "hourly": "c2-7.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "failoverip",
+                "enabled": true
+            },
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            }
+        ],
+        "quota": 5
+    },
+    {
+        "id": "3c83dfbd-abdb-43d0-b041-3ac44009c2f7",
+        "name": "s1-4",
+        "region": "SBG5",
+        "ram": 4000,
+        "disk": 20,
+        "vcpus": 1,
+        "type": "ovh.vps-ssd",
+        "osType": "linux",
+        "inboundBandwidth": 100,
+        "outboundBandwidth": 100,
+        "available": true,
+        "planCodes": {
+            "monthly": "s1-4.monthly.postpaid",
+            "hourly": "s1-4.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            },
+            {
+                "name": "resize",
+                "enabled": true
+            }
+        ],
+        "quota": 10
+    },
+    {
+        "id": "1a5fddab-4ddc-4619-ad29-09932b6bcb9f",
+        "name": "r2-60",
+        "region": "SBG5",
+        "ram": 60000,
+        "disk": 100,
+        "vcpus": 4,
+        "type": "ovh.ssd.ram",
+        "osType": "linux",
+        "inboundBandwidth": 250,
+        "outboundBandwidth": 250,
+        "available": true,
+        "planCodes": {
+            "monthly": "r2-60.monthly.postpaid",
+            "hourly": "r2-60.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "failoverip",
+                "enabled": true
+            },
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            }
+        ],
+        "quota": 0
+    },
+    {
+        "id": "8ab060cc-e259-454b-a4e0-1b81d6f8563e",
+        "name": "t1-180",
+        "region": "GRA7",
+        "ram": 180000,
+        "disk": 50,
+        "vcpus": 36,
+        "type": "ovh.raid-nvme.t1",
+        "osType": "linux",
+        "inboundBandwidth": 10000,
+        "outboundBandwidth": 10000,
+        "available": false,
+        "planCodes": {
+            "monthly": "t1-180.monthly.postpaid",
+            "hourly": "t1-180.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            }
+        ],
+        "quota": 0
+    }
+]

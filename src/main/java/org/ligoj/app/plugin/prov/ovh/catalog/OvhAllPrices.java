@@ -15,8 +15,6 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhAllPrices {
 
-	private List<OvhProjectCreation> projectCreation = Collections.emptyList();
-
 	private List<OvhStorage> storage = Collections.emptyList();
 
 	private List<OvhArchive> archive = Collections.emptyList();
@@ -25,7 +23,7 @@ public class OvhAllPrices {
 
 	private List<OvhVolume> volumes = Collections.emptyList();
 
-	private List<OvhFlavor> instances = Collections.emptyList();
+	private List<OvhInstancePrice> instances = Collections.emptyList();
 
 	private List<OvhSnapshot> snapshots = Collections.emptyList();
 

@@ -1,4 +1,5 @@
 /*
+
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 package org.ligoj.app.plugin.prov.ovh;
@@ -65,9 +66,30 @@ public class ProvOvhPluginResource extends AbstractProvResource implements Impor
 	 */
 	public static final String PARAMETER_SERVICE_NAME =  KEY +":service-name";
 
+	/**
+	 * Default OVH Service endpoint
+	 */
 	public static final String ENDPOINT = "https://eu.api.ovh.com/1.0";
-	
-	public static final String OVH_FLAVORS = ENDPOINT+"/cloud/project"+PARAMETER_SERVICE_NAME+"/flavor";
+
+	/**
+	 * Configuration key used for enabled instance type pattern names. When value is <code>null</code>, no restriction.
+	 */
+	public static final String CONF_ITYPE = ProvOvhPluginResource.KEY + ":instance-type";
+
+	/**
+	 * Configuration key used for enabled database type pattern names. When value is <code>null</code>, no restriction.
+	 */
+	public static final String CONF_DTYPE = ProvOvhPluginResource.KEY + ":database-type";
+	/**
+	 * Configuration key used for enabled database engine pattern names. When value is <code>null</code>, no
+	 * restriction.
+	 */
+	public static final String CONF_ENGINE = ProvOvhPluginResource.KEY + ":database-engine";
+
+	/**
+	 * Configuration key used for enabled OS pattern names. When value is <code>null</code>, no restriction.
+	 */
+	public static final String CONF_OS = ProvOvhPluginResource.KEY + ":os";
 
 	@Autowired
 	protected OvhPriceImport priceImport;
