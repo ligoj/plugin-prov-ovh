@@ -15,7 +15,6 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,14 +32,11 @@ import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
-import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImportBase;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
-import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -56,26 +52,21 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 
 	private static final String MOCK_URL = "http://localhost:" + MOCK_PORT + "/mock";
 
+	protected int subscription;
+
 	@Autowired
 	private ProvOvhPluginResource resource;
-	
-	@Autowired
-	private ConfigurationResource configuration;
-	
-	@Autowired
-	private OvhPriceImportBase base;
-
-	protected int subscription;
 
 	@BeforeEach
 	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
 				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
-						Parameter.class, ProvLocation.class, Subscription.class, ParameterValue.class,
-						ProvQuote.class },
+						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
+						ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
+		cacheManager.getCache("curl-tokens").clear();
 	}
 
 	@Test
@@ -86,6 +77,13 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	@Test
 	void getName() {
 		Assertions.assertEquals("OVH", resource.getName());
+	}
+
+	/**
+	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
+	 */
+	private int getSubscription(final String project) {
+		return getSubscription(project, ProvOvhPluginResource.KEY);
 	}
 
 	@Test
@@ -200,38 +198,4 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 		return resource.validateAccess(subscription);
 	}
-
-	/**
-	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
-	 */
-	private int getSubscription(final String project) {
-		return getSubscription(project, ProvOvhPluginResource.KEY);
-	}
-	
-	private void prepareMockAuth() throws IOException {
-		configuration.put(OvhPriceImportBase.OVH_FLAVORS, "http://localhost:" + MOCK_PORT);
-		httpServer.stubFor(get(urlEqualTo("/flavor"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), "UTF-8"))));
-		httpServer.start();
-	}
-	
-	@Test
-	void getPrices() throws Exception {
-		prepareMockAuth();
-		var prices = base.getPrices();
-	}
-	
-	/**
-	@Test
-	void getRegions() throws Exception {
-		configuration.put(OvhPriceImportBase.OVH_FLAVORS, "http://localhost:" + MOCK_PORT);
-		httpServer.stubFor(get(urlEqualTo("/regions"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/regions.json").getInputStream(), "UTF-8"))));
-		httpServer.start();
-		var regions = base.getRegions();
-	}
-	*/
-	
 }

@@ -1,0 +1,5 @@
+node.id;code;slaStartTime;slaEndTime;slaWeekEnd;commitment;accessApi;accessEmail;accessChat;accessPhone;seats;slaGeneralGuidance;slaSystemImpaired;slaProductionSystemImpaired;slaProductionSystemDown;slaBusinessCriticalSystemDown;level;description
+service:prov:ovh;Standard;28800000;64800000;FALSE;1;;BILLING;ALL;;;;2880000;;;;WORST;https://www.ovhcloud.com/en/support-levels/standard/
+service:prov:ovh;Premium;28800000;64800000;FALSE;1;;ALL;ALL;;;86400000;7200000;;;;LOW;https://www.ovhcloud.com/en/support-levels/premium/
+service:prov:ovh;Business;0;86400000;TRUE;1;ALL;ALL;ALL;ALL;;86400000;1800000;1800000;1800000;;MEDIUM;https://www.ovhcloud.com/en/support-levels/business/
+service:prov:ovh;Enterprise;0;86400000;TRUE;1;ALL;ALL;ALL;ALL;;86400000;900000;900000;900000;900000;BEST;https://www.ovhcloud.com/en/support-levels/enterprise/
