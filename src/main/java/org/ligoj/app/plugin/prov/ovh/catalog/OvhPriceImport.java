@@ -104,6 +104,23 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	public static final String OVH_FLAVORS_PATH = "/flavor.json"; // Public: "/cloud/project/%s/flavor"
 
 	/**
+	 * <code>
+	 * curl -s https://www.ovhcloud.com/en/public-cloud/prices/ | \
+	grep "data-price"  \
+	| sed 's/^.*<tr data-price="//g' \
+	| sed 's|}"||g' \
+	| sed 's|">.*$|"},|' \
+	| sed 's/ data-planCode="/,"planCode":"/' \
+	| sed 's/ data-regions="/,"regions":"/' \
+	| sed 's/ data-price-type="/,"term":"/' \
+	| sed 's/&quot;/"/g'\
+	| sed 's|\\/|/|g'\
+	| sed 's|  | |g' > database-price.json
+	</code>
+	 */
+	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
+
+	/**
 	 * Default pricing URL.
 	 */
 	protected static final String DEFAULT_API_PRICES = "https://da9smdsh48mvy.cloudfront.net"; // https://ovh.ligoj.io";
@@ -298,6 +315,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		return getApiPriceUrl("-public-", OVH_FLAVORS_PATH);
 	}
 
+	private String getPricesDatabaseUrl() {
+		return getApiPriceUrl("-public-", OVH_PRICES_DATABASE_PATH);
+	}
+
 	private String getRegionsUrl() {
 		return getApiPriceUrl("-public-", OVH_REGIONS_PATH);
 	}
@@ -317,15 +338,19 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		}
 	}
 
-	public OvhAllPrices getPrices() throws IOException {
+	private OvhAllPrices getPricesDatabase() throws IOException {
+		return getResource(this::getPricesDatabaseUrl, OvhAllPrices.class, null);
+	}
+
+	private OvhAllPrices getPrices() throws IOException {
 		return getResource(this::getPricesUrl, OvhAllPrices.class, null);
 	}
 
-	public List<OvhFlavor> getFlavors() throws IOException {
+	private List<OvhFlavor> getFlavors() throws IOException {
 		return getResource(this::getFlavorsUrl, null, FLAVOR_LIST);
 	}
 
-	public OvhRegions getRegions() throws IOException {
+	private OvhRegions getRegions() throws IOException {
 		return getResource(this::getRegionsUrl, OvhRegions.class, null);
 	}
 
