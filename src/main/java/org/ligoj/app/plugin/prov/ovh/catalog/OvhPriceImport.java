@@ -70,27 +70,31 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	protected static final String PREFIX = "digitalocean";
 
 	/**
-	 * Configuration key used for enabled instance type pattern names. When value is <code>null</code>, no restriction.
+	 * Configuration key used for enabled instance type pattern names. When value is
+	 * <code>null</code>, no restriction.
 	 */
 	public static final String CONF_ITYPE = ProvOvhPluginResource.KEY + ":instance-type";
 
 	/**
-	 * Configuration key used for enabled database type pattern names. When value is <code>null</code>, no restriction.
+	 * Configuration key used for enabled database type pattern names. When value is
+	 * <code>null</code>, no restriction.
 	 */
 	public static final String CONF_DTYPE = ProvOvhPluginResource.KEY + ":database-type";
 	/**
-	 * Configuration key used for enabled database engine pattern names. When value is <code>null</code>, no
-	 * restriction.
+	 * Configuration key used for enabled database engine pattern names. When value
+	 * is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_ENGINE = ProvOvhPluginResource.KEY + ":database-engine";
 
 	/**
-	 * Configuration key used for enabled OS pattern names. When value is <code>null</code>, no restriction.
+	 * Configuration key used for enabled OS pattern names. When value is
+	 * <code>null</code>, no restriction.
 	 */
 	public static final String CONF_OS = ProvOvhPluginResource.KEY + ":os";
 
 	/**
-	 * Configuration key used for enabled regions pattern names. When value is <code>null</code>, no restriction.
+	 * Configuration key used for enabled regions pattern names. When value is
+	 * <code>null</code>, no restriction.
 	 */
 	public static final String CONF_REGIONS = ProvOvhPluginResource.KEY + ":regions";
 
@@ -120,6 +124,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
 
+	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/databaseAvaibility.json"; // Public: "/cloud/project/%s/database/availability"
+
+	public static final String OVH_CAPABILITIES_DATABASE_PATH = "/databaseCapabilities.json"; // Public: "/cloud/project/%s/database/capabilities"
+
 	/**
 	 * Default pricing URL.
 	 */
@@ -130,6 +138,18 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	};
 
 	private static final TypeReference<List<OvhFlavor>> FLAVOR_LIST = new TypeReference<>() {
+		// Nothing to extend
+	};
+
+	private static final TypeReference<List<OvhDatabase>> DATABASE_LIST = new TypeReference<>() {
+		// Nothing to extend
+	};
+
+	private static final TypeReference<List<OvhDatabaseAvaibility>> DATABASE_AVAIBILITY_LIST = new TypeReference<>() {
+		// Nothing to extend OvhDatabaseCapabilities
+	};
+
+	private static final TypeReference<List<OvhDatabaseCapabilities>> DATABASE_CAPABILITIES_LIST = new TypeReference<>() {
 		// Nothing to extend
 	};
 
@@ -189,6 +209,42 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
 					.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
 		}
+	
+		// Database
+		nextStep(context, "install-database");
+		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
+				.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
+		
+		try (var curl = new CurlProcessor()) {
+			final var pricesDatabases = getPricesDatabase();
+			final var databasesAvaibility = getDatabases();
+			final var datbaseCapabilities = getDatabasesCapabilities();
+			
+			
+			databasesAvaibility.stream().filter(e -> isEnabledEngine(context, e.getEngine()))
+			.forEach(engine -> datbaseCapabilities.stream().forEach(s -> {
+				final var codeType = s.getNameFlavor();
+				if (isEnabledDatabaseType(context, codeType)) {
+					var type = installDatabaseType(context, codeType, s);
+					context.getRegions().keySet().stream().filter(r -> isEnabledRegionDatabase(context, r))
+							.forEach(region -> pricesDatabases.stream().forEach(price -> {
+								
+								// Install monthly based price
+								var partialCode = codeType + "/" + engine;
+								installDatabasePrice(context, monthlyTerm,
+										monthlyTerm.getCode() + "/" + partialCode, type,									
+										price.getMonthlyPrice(), engine.getEngine(), null, false, region);
+
+								// Install hourly based price
+								installDatabasePrice(context, hourlyTerm,
+										hourlyTerm.getCode() + "-" + partialCode, type,
+										price.getHourlyPrice() ,
+										engine.getEngine(), null, false, region);
+							}));
+				}
+			}));
+		}
+		
 //
 //		// Database
 //		nextStep(context, "install-database");
@@ -203,7 +259,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 //			// Engine
 //			if (!engineMatcher.find()) {
 //				// Prices format has changed too much, unable to parse data
-//				throw new BusinessException("DigitalOcean prices API cannot be parsed, engines not found");
+//			throw new BusinessException("DigitalOcean prices API cannot be parsed, engines not found");
 //			}
 //			final var dbaasDbs = mapper
 //					.readValue(
@@ -315,6 +371,14 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		return getApiPriceUrl("-public-", OVH_FLAVORS_PATH);
 	}
 
+	private String getDatabaseAvaibilityUrl() {
+		return getApiPriceUrl("-public-", OVH_AVAIBILITY_DATABASE_PATH);
+	}
+
+	private String getDatabaseCapabilitiesyUrl() {
+		return getApiPriceUrl("-public-", OVH_CAPABILITIES_DATABASE_PATH);
+	}
+
 	private String getPricesDatabaseUrl() {
 		return getApiPriceUrl("-public-", OVH_PRICES_DATABASE_PATH);
 	}
@@ -338,9 +402,21 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		}
 	}
 
-	private OvhAllPrices getPricesDatabase() throws IOException {
-		return getResource(this::getPricesDatabaseUrl, OvhAllPrices.class, null);
+	private List<OvhDatabaseAvaibility> getDatabases() throws IOException {
+		return getResource(this::getDatabaseAvaibilityUrl, null, DATABASE_AVAIBILITY_LIST);
 	}
+
+	private List<OvhDatabaseCapabilities> getDatabasesCapabilities() throws IOException {
+		return getResource(this::getDatabaseCapabilitiesyUrl, null, DATABASE_CAPABILITIES_LIST);
+	}
+
+	private List<OvhDatabase> getPricesDatabase() throws IOException {
+		return getResource(this::getPricesDatabaseUrl, null, DATABASE_LIST);
+	}
+	
+	//private OvhDatabase getPricesDatabase() throws IOException {
+	//	return getResource(this::getPricesDatabaseUrl, OvhDatabase.class, null);
+	//}
 
 	private OvhAllPrices getPrices() throws IOException {
 		return getResource(this::getPricesUrl, OvhAllPrices.class, null);
@@ -379,7 +455,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 *
 	 * @param context The update context.
 	 * @param region  The region code to test.
-	 * @return <code>true</code> when the region is available and enabled for the database service.
+	 * @return <code>true</code> when the region is available and enabled for the
+	 *         database service.
 	 */
 	protected boolean isEnabledRegionDatabase(final UpdateContext context, final String region) {
 		return isEnabledRegion(context, region);
@@ -396,7 +473,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 *
 	 * @param context The update context.
 	 * @param region  The region code to test.
-	 * @return <code>true</code> when the region is available and enabled for the volume service.
+	 * @return <code>true</code> when the region is available and enabled for the
+	 *         volume service.
 	 */
 	protected boolean isEnabledRegionVolume(UpdateContext context, final String region) {
 		return isEnabledRegion(context, region);
@@ -570,34 +648,34 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setEphemeral(false);
 		});
 	}
-//
-//	/**
-//	 * Install a new database type as needed.
-//	 */
-//	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-//			final DatabasePrice aType) {
-//		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
-//			final var newType = new ProvDatabaseType();
-//			newType.setNode(context.getNode());
-//			newType.setCode(c);
-//			return newType;
-//		});
-//
-//		// Merge as needed
-//		return copyAsNeeded(context, type, t -> {
-//			t.setName("DB " + aType.getCpu() + "vCPU " + aType.getMemory() + "GiB");
-//			t.setCpu(aType.getCpu());
-//			t.setRam(aType.getMemory() * 1024); // Convert in MiB
-//			t.setConstant(true);
-//			t.setAutoScale(false);
-//
-//			// Rating
-//			t.setCpuRate(Rate.MEDIUM);
-//			t.setRamRate(Rate.MEDIUM);
-//			t.setNetworkRate(Rate.MEDIUM);
-//			t.setStorageRate(Rate.MEDIUM);
-//		}, dtRepository);
-//	}
+
+	/**
+	 * Install a new database type as needed.
+	 */
+	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
+			final OvhDatabaseCapabilities aType) {
+		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
+			final var newType = new ProvDatabaseType();
+			newType.setNode(context.getNode());
+			newType.setCode(c);
+			return newType;
+		});
+
+		// Merge as needed
+		return copyAsNeeded(context, type, t -> {
+			t.setName("DB " + aType.getCore() + "vCPU " + aType.getMemory() + "GiB");
+			t.setCpu(aType.getCore());
+			t.setRam(aType.getMemory() * 1024); // Convert in MiB
+			t.setConstant(true);
+			t.setAutoScale(false);
+
+			// Rating
+			t.setCpuRate(Rate.MEDIUM);
+			t.setRamRate(Rate.MEDIUM);
+			t.setNetworkRate(Rate.MEDIUM);
+			t.setStorageRate(Rate.MEDIUM);
+		}, dtRepository);
+	}
 
 	/**
 	 * Install a new instance price as needed.

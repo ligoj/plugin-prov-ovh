@@ -3,6 +3,8 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,19 +16,52 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhDatabaseAvaibility {
 
-	@JsonProperty("name")
-	private String name;
-
+	@JsonProperty("engine")
+	private String engine;
+	
 	@JsonProperty("version")
-	private Object version;
+	private String version;
+	
+	@JsonProperty("plan")
+	private String plan;
+	
+	@JsonProperty("default")
+	private boolean defaultt;
+	
+	@JsonProperty("region")
+	private String region;
+	
+	@JsonProperty("flavor")
+	private String flavor;
+	
+	@JsonProperty("startDate")
+	private Date startDate;
 
-	@JsonProperty("defaultVersion")
-	private String defaultVersion;
+	@JsonProperty("endOfLife")
+	private String endOfLife;
 
-	@JsonProperty("description")
-	private String description;
+	@JsonProperty("upstreamEndOfLife")
+	private String upstreamEndOfLife;
 
-	@JsonProperty("sslModes")
-	private Object sslModes;
+	@JsonProperty("network")
+	private String network;
+
+	@JsonProperty("backup")
+	private String backup;
+	
+	@JsonProperty("minNodeNumber")
+	private int minNodeNumber;
+	
+	@JsonProperty("maxNodeNumber")
+	private int maxNodeNumber;
+	
+	@JsonProperty("minDiskSize")
+	private int minDiskSize;
+	
+	@JsonProperty("maxDiskSize")
+	private int maxDiskSize;
+	
+	@JsonProperty("status")
+	private String status;
 
 }
