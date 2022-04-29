@@ -35,8 +35,8 @@ public class OvhStorage {
 
 	@JsonProperty("price")
 	private void getPrice(Map<String, String> monthlyPrice) {
-		this.priceValue = (String) monthlyPrice.get("value");
-		this.priceCurrencyCode = (String) monthlyPrice.get("currencyCode");
+		this.priceValue = monthlyPrice.get("value");
+		this.priceCurrencyCode = monthlyPrice.get("currencyCode");
 	}
 
 }

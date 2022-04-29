@@ -34,9 +34,9 @@ public class OvhSnapshot {
 	}
 
 	@JsonProperty("price")
-	private void getPrice(Map<String, String> price) {
-		this.value = (String) price.get("value");
-		this.currencyCode = (String) price.get("currencyCode");
+	private void getPrice(final Map<String, String> price) {
+		this.value = price.get("value");
+		this.currencyCode = price.get("currencyCode");
 	}
 
 }
