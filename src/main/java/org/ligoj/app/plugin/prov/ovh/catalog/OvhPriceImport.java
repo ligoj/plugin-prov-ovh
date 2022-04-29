@@ -124,9 +124,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
 
-	public static final String OVH_AVAIBILITY_DATABASE_PATH = ""; // Public: "/cloud/project/%s/database/availability"
+	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/databaseAvaibility.json"; // Public: "/cloud/project/%s/database/availability"
 
-	public static final String OVH_CAPABILITIES_DATABASE_PATH = ""; // Public: "/cloud/project/%s/database/capabilities"
+	public static final String OVH_CAPABILITIES_DATABASE_PATH = "/databaseCapabilities.json"; // Public: "/cloud/project/%s/database/capabilities"
 
 	/**
 	 * Default pricing URL.
@@ -209,7 +209,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
 					.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
 		}
-		
+	
 		// Database
 		nextStep(context, "install-database");
 		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
@@ -218,7 +218,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		try (var curl = new CurlProcessor()) {
 			final var pricesDatabases = getPricesDatabase();
 			final var databasesAvaibility = getDatabases();
-			final var datbaseCapabilities = getDatabasesCapabilities();	
+			final var datbaseCapabilities = getDatabasesCapabilities();
 			
 			
 			databasesAvaibility.stream().filter(e -> isEnabledEngine(context, e.getEngine()))
@@ -232,7 +232,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 								// Install monthly based price
 								var partialCode = codeType + "/" + engine;
 								installDatabasePrice(context, monthlyTerm,
-										monthlyTerm.getCode() + "/" + partialCode, type,										
+										monthlyTerm.getCode() + "/" + partialCode, type,									
 										price.getMonthlyPrice(), engine.getEngine(), null, false, region);
 
 								// Install hourly based price
@@ -243,7 +243,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							}));
 				}
 			}));
-		}	
+		}
+		
 //
 //		// Database
 //		nextStep(context, "install-database");
@@ -412,6 +413,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private List<OvhDatabase> getPricesDatabase() throws IOException {
 		return getResource(this::getPricesDatabaseUrl, null, DATABASE_LIST);
 	}
+	
+	//private OvhDatabase getPricesDatabase() throws IOException {
+	//	return getResource(this::getPricesDatabaseUrl, OvhDatabase.class, null);
+	//}
 
 	private OvhAllPrices getPrices() throws IOException {
 		return getResource(this::getPricesUrl, OvhAllPrices.class, null);

@@ -20,7 +20,7 @@ public class OvhDatabaseAvaibility {
 	private String engine;
 	
 	@JsonProperty("version")
-	private double version;
+	private String version;
 	
 	@JsonProperty("plan")
 	private String plan;

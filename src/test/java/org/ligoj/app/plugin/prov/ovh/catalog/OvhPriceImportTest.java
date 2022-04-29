@@ -280,6 +280,20 @@ class OvhPriceImportTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlEqualTo("/v2/region.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
 						new ClassPathResource("mock-server/ovh/v2/regions.json").getInputStream(), "UTF-8"))));
+
+		httpServer.stubFor(get(urlEqualTo("/databaseAvaibility.json"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/ovh/databaseAvaibility.json").getInputStream(), "UTF-8"))));
+		httpServer.stubFor(
+				get(urlEqualTo("/databaseCapabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toString(
+								new ClassPathResource("mock-server/ovh/databaseCapabilities.json").getInputStream(),
+								"UTF-8"))));
+		httpServer.stubFor(get(urlEqualTo("/database-price.json"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/ovh/database-price.json").getInputStream(), "UTF-8"))));
+
+
 		httpServer.start();
 	}
 
@@ -394,7 +408,8 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertTrue(createInstance.getTotal().getMin() > 1);
 		Assertions.assertTrue(createInstance.getId() > 0);
 
-		// Lookup block storage (volume) within a region different from the one of attached server -> no match
+		// Lookup block storage (volume) within a region different from the one of
+		// attached server -> no match
 		// ---------------------------------
 		Assertions.assertEquals(0,
 				qsResource.lookup(subscription,
@@ -466,7 +481,8 @@ class OvhPriceImportTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
+	 * Return the subscription identifier of the given project. Assumes there is
+	 * only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
 		return getSubscription(project, ProvOvhPluginResource.KEY);

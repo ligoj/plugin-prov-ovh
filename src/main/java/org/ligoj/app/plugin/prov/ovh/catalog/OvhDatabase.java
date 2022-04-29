@@ -16,9 +16,9 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhDatabase {
 
-	private double monthlyPrice;
+	private Double monthlyPrice;
 
-	private double hourlyPrice;
+	private Double hourlyPrice;
 
 	private String term;
 
@@ -29,7 +29,9 @@ public class OvhDatabase {
 
 	@JsonProperty("all")
 	private void getMonthlyPrice(Map<String, Object> allPrice) {
-		this.monthlyPrice = (double) allPrice.get("monthly");
-		this.hourlyPrice = (double) allPrice.get("hourly");
+		String mPrice =  (String) allPrice.get("monthly");
+		this.monthlyPrice = Double.parseDouble(mPrice.replace("$", "").replace(",", ""));
+		String hPrice =  (String) allPrice.get("monthly");
+		this.hourlyPrice = Double.parseDouble(hPrice.replace("$", "").replace(",", ""));
 	}
 }
