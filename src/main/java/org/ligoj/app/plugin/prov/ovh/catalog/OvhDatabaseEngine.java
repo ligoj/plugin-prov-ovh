@@ -4,17 +4,20 @@
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Database engine properties.
+ */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OvhVolume extends OvhStorage {
+public class OvhDatabaseEngine {
 
-	@JsonProperty("volumeName")
+	/**
+	 * Engine name like: <code>mysql</code>, <code>postgresql</code>
+	 */
 	private String name;
-
 }

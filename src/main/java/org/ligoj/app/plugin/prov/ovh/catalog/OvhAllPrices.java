@@ -17,7 +17,7 @@ public class OvhAllPrices {
 
 	private List<OvhStorage> storage = Collections.emptyList();
 
-	private List<OvhArchive> archive = Collections.emptyList();
+	private List<OvhStorage> archive = Collections.emptyList();
 
 	private List<OvhBandwidthArchiveIn> bandwidthArchiveIn = Collections.emptyList();
 
@@ -25,7 +25,7 @@ public class OvhAllPrices {
 
 	private List<OvhInstancePrice> instances = Collections.emptyList();
 
-	private List<OvhSnapshot> snapshots = Collections.emptyList();
+	private List<OvhStorage> snapshots = Collections.emptyList();
 
 	private List<OvhBandwidthStorage> bandwidthStorage = Collections.emptyList();
 

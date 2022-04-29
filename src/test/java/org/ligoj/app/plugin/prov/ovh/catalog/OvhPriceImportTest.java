@@ -173,7 +173,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		final var quote = install();
 
 		// Check the whole quote
-		final var instance = check(quote, 15d, 30d, 5d);
+		final var instance = check(quote, 6865.27d, 30d, 5d);
 
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
@@ -268,8 +268,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), "UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/flavor.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/flavors.json").getInputStream(), "UTF-8"))));
-		httpServer.stubFor(get(urlEqualTo("/region.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-				IOUtils.toString(new ClassPathResource("mock-server/ovh/regions.json").getInputStream(), "UTF-8"))));
 
 		httpServer.stubFor(
 				get(urlEqualTo("/v2/price.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
@@ -277,9 +275,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlEqualTo("/v2/flavor.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
 						new ClassPathResource("mock-server/ovh/v2/flavors.json").getInputStream(), "UTF-8"))));
-		httpServer.stubFor(get(urlEqualTo("/v2/region.json"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/v2/regions.json").getInputStream(), "UTF-8"))));
 
 		httpServer.stubFor(get(urlEqualTo("/databaseAvaibility.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
@@ -292,7 +287,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlEqualTo("/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
 						new ClassPathResource("mock-server/ovh/database-price.json").getInputStream(), "UTF-8"))));
-
 
 		httpServer.start();
 	}
@@ -413,26 +407,20 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		Assertions.assertEquals(0,
 				qsResource.lookup(subscription,
-						QuoteStorageQuery.builder().size(5).location("sgp1").instance(createInstance.getId()).build())
+						QuoteStorageQuery.builder().size(5).location("sbg5").instance(createInstance.getId()).build())
 						.size());
-
-		// Lookup block storage (volume) unavailable within this location
-		// ---------------------------------
-		Assertions.assertEquals(0, qsResource.lookup(subscription,
-				QuoteStorageQuery.builder().size(5).location("sfo1").optimized(ProvStorageOptimized.IOPS).build())
-				.size());
 
 		// Lookup STANDARD SSD storage within the same region than the attached server
 		// ---------------------------------
 		var sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW)
-				.location("sfo2").instance(createInstance.getId()).build()).get(0);
-		Assertions.assertEquals(0.5, sLookup.getCost(), DELTA);
+				.location("gra7").instance(createInstance.getId()).build()).get(0);
+		Assertions.assertEquals(0.2, sLookup.getCost(), DELTA);
 		var price = sLookup.getPrice();
-		Assertions.assertEquals("sfo2/do-block-storage-standard", price.getCode());
+		Assertions.assertEquals("gra7/volume.classic", price.getCode());
 		var type = price.getType();
-		Assertions.assertEquals("do-block-storage-standard", type.getCode());
-		Assertions.assertEquals("sfo2", price.getLocation().getName());
-		Assertions.assertEquals("San Francisco 2", price.getLocation().getDescription());
+		Assertions.assertEquals("volume.classic", type.getCode());
+		Assertions.assertEquals("gra7", price.getLocation().getName());
+		Assertions.assertEquals("Gravelines", price.getLocation().getDescription());
 
 		// New storage attached to the created instance
 		var svo = new QuoteStorageEditionVo();
@@ -445,35 +433,35 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertTrue(createStorage.getTotal().getMin() > 1);
 		Assertions.assertTrue(createStorage.getId() > 0);
 
-		// Lookup snapshot
+		// Lookup blob storage
 		// ---------------------------------
-		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).location("sfo1")
+		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).location("gra7")
 				.optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
-		Assertions.assertEquals(0.25, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(0.05, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
-		Assertions.assertEquals("sfo1/do-snapshot", price.getCode());
+		Assertions.assertEquals("gra7/storage", price.getCode());
 		type = price.getType();
-		Assertions.assertEquals("do-snapshot", type.getCode());
-		Assertions.assertEquals("sfo1", price.getLocation().getName());
-		Assertions.assertEquals("San Francisco 1", price.getLocation().getDescription());
-		Assertions.assertEquals("California", price.getLocation().getSubRegion());
+		Assertions.assertEquals("storage", type.getCode());
+		Assertions.assertEquals("Object Storage", type.getName());
+		Assertions.assertEquals("gra7", price.getLocation().getName());
+		Assertions.assertEquals("Hauts-de-France", price.getLocation().getSubRegion());
 
 		// Lookup Database unavailable in a region
 		// ---------------------------------
 		Assertions.assertNull(qbResource.lookup(subscription,
-				QuoteDatabaseQuery.builder().location("sfo1").engine("MySQL").cpu(3).build()));
+				QuoteDatabaseQuery.builder().location("sbg5").engine("MYSQL").cpu(3).build()));
 
 		// Lookup Database in an available region
 		// ---------------------------------
 		var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MySQL").cpu(2).build());
-		Assertions.assertEquals(60, dLookup.getCost(), DELTA);
+		Assertions.assertEquals(217.84d, dLookup.getCost(), DELTA);
 		var dPrice = dLookup.getPrice();
-		Assertions.assertEquals("nyc1/monthly/db-2-4/MySQL", dPrice.getCode());
+		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
 		var dType = dPrice.getType();
-		Assertions.assertEquals("db-2-4", dType.getCode());
-		Assertions.assertEquals("DB 2vCPU 4GiB", dType.getName());
-		Assertions.assertEquals("nyc1", dPrice.getLocation().getName());
-		Assertions.assertEquals("New York 1", dPrice.getLocation().getDescription());
+		Assertions.assertEquals("essential/db1-15", dType.getCode());
+		Assertions.assertEquals("essential/db1-15", dType.getName());
+		Assertions.assertEquals("gra7", dPrice.getLocation().getName());
+		Assertions.assertEquals("Gravelines", dPrice.getLocation().getDescription());
 
 		em.flush();
 		em.clear();
@@ -481,8 +469,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Return the subscription identifier of the given project. Assumes there is
-	 * only one subscription for a service.
+	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
 		return getSubscription(project, ProvOvhPluginResource.KEY);
