@@ -173,7 +173,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		final var quote = install();
 
 		// Check the whole quote
-		final var instance = check(quote, 6865.27d, 30d, 5d);
+		final var instance = check(quote, 6865.27d, 13730.54d, 5d);
 
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
@@ -322,12 +322,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 	}
 
 	private ProvQuoteStorage checkStorage(final ProvQuoteStorage storage) {
-		Assertions.assertEquals(10d, storage.getCost(), DELTA);
+		Assertions.assertEquals(4d, storage.getCost(), DELTA);
 		Assertions.assertEquals(100, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
 		final var type = storage.getPrice().getType();
-		Assertions.assertEquals("do-block-storage-standard", type.getCode());
-		Assertions.assertEquals("do-block-storage-standard", type.getName());
+		Assertions.assertEquals("volume.classic", type.getCode());
+		Assertions.assertEquals("Classic", type.getName());
 		Assertions.assertEquals(5000, type.getIops());
 		Assertions.assertEquals(200, type.getThroughput());
 		Assertions.assertEquals(0d, storage.getPrice().getCostTransaction(), DELTA);
