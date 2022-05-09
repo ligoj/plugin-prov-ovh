@@ -1,5 +1,5 @@
 {
-  "BHS": {
+  "bhs": {
     "name": "Beauharnois",
     "continentM49": 19,
     "regionM49": 21,
@@ -10,7 +10,7 @@
     "latitude": 45.2986,
     "longitude": -73.9638
   },
-  "DE": {
+  "de": {
     "name": "Frankford",
     "continentM49": 19,
     "regionM49": 21,
@@ -21,7 +21,7 @@
     "latitude": 40.0149,
     "longitude": -75.0967
   },
-  "GRA": {
+  "gra": {
     "name": "Gravelines",
     "continentM49": 150,
     "regionM49": 155,
@@ -32,7 +32,7 @@
     "latitude": 51.0028,
     "longitude": 2.1077
   },
-  "SBG": {
+  "sgb": {
     "name": "Strasbourg",
     "continentM49": 150,
     "regionM49": 155,
@@ -43,7 +43,7 @@
     "latitude": 48.5690,
     "longitude": 7.691
   },
-  "SGP": {
+  "sgp": {
     "name": "Singapour",
     "continentM49": 142,
     "regionM49": 35,
@@ -53,7 +53,7 @@
     "latitude": 1.3139,
     "longitude": 103.5633
   },
-  "SYD": {
+  "syd": {
     "name": "Sydney",
     "continentM49": 9,
     "regionM49": 53,
@@ -64,7 +64,7 @@
     "latitude": -33.8469,
     "longitude": 150.3701
   },
-  "UK": {
+  "uk": {
     "name": "London",
     "continentM49": 150,
     "regionM49": 154,
@@ -75,7 +75,7 @@
     "latitude": 51.5283,
     "longitude": -0.3824
   },
-  "WAW": {
+  "waw": {
     "name": "Varsovie",
     "continentM49": 150,
     "regionM49": 151,

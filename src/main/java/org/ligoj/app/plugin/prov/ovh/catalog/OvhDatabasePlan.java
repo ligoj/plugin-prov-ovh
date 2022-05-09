@@ -4,17 +4,31 @@
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * OVH database plan.
+ */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OvhVolume extends OvhStorage {
+public class OvhDatabasePlan {
 
-	@JsonProperty("volumeName")
+	/**
+	 * Name
+	 */
 	private String name;
+
+	/**
+	 * Short description.
+	 */
+	private String description;
+
+	/**
+	 * Backup retrention code: <code>P2D</code>, <code>P30D</code>
+	 */
+	private String backupRetention;
 
 }

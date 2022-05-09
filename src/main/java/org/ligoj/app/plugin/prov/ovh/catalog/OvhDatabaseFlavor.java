@@ -4,17 +4,36 @@
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * OVH database flavor: database's type attributes.
+ *
+ */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OvhVolume extends OvhStorage {
+public class OvhDatabaseFlavor {
 
-	@JsonProperty("volumeName")
+	/**
+	 * Flavor name.
+	 */
 	private String name;
 
+	/**
+	 * Amount of vCPUs.
+	 */
+	private int core;
+
+	/**
+	 * Memory size in GiB.
+	 */
+	private int memory;
+
+	/**
+	 * Storage size in GiB.
+	 */
+	private int storage;
 }
