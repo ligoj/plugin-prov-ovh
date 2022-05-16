@@ -214,5 +214,77 @@
             }
         ],
         "quota": 0
+    },
+    {
+        "id": "8ab060cc-e259-454b-a4e0-1b81d6f8563e-suse",
+        "name": "suse-t1-180",
+        "region": "GRA7",
+        "ram": 180000,
+        "disk": 50,
+        "vcpus": 36,
+        "type": "ovh.raid-nvme.t1",
+        "osType": "suse",
+        "inboundBandwidth": 10000,
+        "outboundBandwidth": 10000,
+        "available": false,
+        "planCodes": {
+            "monthly": "t1-180.monthly.postpaid",
+            "hourly": "t1-180.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            }
+        ],
+        "quota": 0
+    },
+    {
+        "id": "8ab060cc-e259-454b-a4e0-1b81d6f8563e-typefail",
+        "name": "type/t1/180",
+        "region": "SGB5",
+        "ram": 180000,
+        "disk": 50,
+        "vcpus": 36,
+        "type": "ovhraidnvmet1",
+        "osType": "linux",
+        "inboundBandwidth": 10000,
+        "outboundBandwidth": 10000,
+        "available": false,
+        "planCodes": {
+            "monthly": "t1-180.monthly.postpaid",
+            "hourly": "t1-180.consumption"
+        },
+        "capabilities": [
+            {
+                "name": "resize",
+                "enabled": true
+            },
+            {
+                "name": "snapshot",
+                "enabled": true
+            },
+            {
+                "name": "volume",
+                "enabled": true
+            },
+            {
+                "name": "failoverip",
+                "enabled": true
+            }
+        ],
+        "quota": 0
     }
 ]

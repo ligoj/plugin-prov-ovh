@@ -95,6 +95,11 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Configuration key used for enabled regions pattern names. When value is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_REGIONS = ProvOvhPluginResource.KEY + ":regions";
+	
+	/**
+	 * Configuration key used for flavor pattern names. When value is <code>null</code>, no restriction.
+	 */
+	public static final String CONF_FLAVOR = ProvOvhPluginResource.KEY + ":flavor";
 
 	/**
 	 * Path to root bulk price index.
@@ -277,9 +282,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							Function.identity()));
 			databasesAvaibility.stream()
 					.filter(c -> isEnabledEngine(context, c.getEngine())
-							&& isEnabledRegionDatabase(context, c.getRegion().toLowerCase())
-							&& isEnabledDatabaseType(context, c.getFlavor()) && enginesByName.containsKey(c.getEngine())
-							&& flavorsByName.containsKey(c.getFlavor()) && plansByName.containsKey(c.getPlan()))
+							&& isEnabledDatabaseType(context, c.getFlavor()) 
+							&& enginesByName.containsKey(c.getEngine())
+							&& flavorsByName.containsKey(c.getFlavor())
+							&& plansByName.containsKey(c.getPlan()))
 					.forEach(c -> {
 						final var engine = c.getEngine();
 						final var region = c.getRegion().toLowerCase();
@@ -411,32 +417,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyPriceValue(), region);
 	}
 
-	/**
-	 * Check a database is available within the given region.
-	 *
-	 * @param context The update context.
-	 * @param region  The region code to test.
-	 * @return <code>true</code> when the region is available and enabled for the database service.
-	 */
-	protected boolean isEnabledRegionDatabase(final UpdateContext context, final String region) {
-		return isEnabledRegion(context, region);
-	}
-
 	@Override
 	protected boolean isEnabledEngine(final AbstractUpdateContext context, final String engine) {
 		// REDIS is not really an SGBD
-		return super.isEnabledEngine(context, engine) && !engine.equalsIgnoreCase("REDIS");
-	}
-
-	/**
-	 * Check a volume is available within the given region.
-	 *
-	 * @param context The update context.
-	 * @param region  The region code to test.
-	 * @return <code>true</code> when the region is available and enabled for the volume service.
-	 */
-	protected boolean isEnabledRegionVolume(UpdateContext context, final String region) {
-		return isEnabledRegion(context, region);
+		return super.isEnabledEngine(context, engine) && !engine.toUpperCase().equalsIgnoreCase("REDIS");
 	}
 
 	/**
@@ -444,6 +428,16 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	private void installStoragePrices(final UpdateContext context, final OvhAllPrices prices) {
 		nextStep(context, "install-vm-storage");
+		
+		installStorage(context, prices.getSnapshots(), p -> "snapshots", (t, p) -> {
+			t.setIops(7500);
+			t.setThroughput(300);
+			t.setLatency(Rate.LOW);
+			t.setDurability9(11);
+			t.setName("Storage replicated x3");
+			t.setOptimized(ProvStorageOptimized.DURABILITY);
+
+		});
 
 		installStorage(context, prices.getStorage(), p -> "storage", (t, p) -> {
 			t.setIops(5000);
@@ -482,16 +476,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setOptimized(ProvStorageOptimized.IOPS);
 
 		});
-
-		installStorage(context, prices.getSnapshots(), p -> "snapshots", (t, p) -> {
-			t.setIops(7500);
-			t.setThroughput(300);
-			t.setLatency(Rate.LOW);
-			t.setDurability9(11);
-			t.setName("Storage replicated x3");
-			t.setOptimized(ProvStorageOptimized.DURABILITY);
-
-		});
+		
 		installStorage(context, prices.getArchive(), p -> "archive", (t, p) -> {
 			t.setIops(7500);
 			t.setThroughput(300);
@@ -654,7 +639,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		return copyAsNeeded(context, type, t -> {
 			t.setName(code);
 			t.setCpu(aType.getCore());
-			t.setRam(aType.getMemory() * 1024); // Convert to MiB
+			t.setRam(aType.getMemory() * 1024.0); // Convert to MiB
 			t.setConstant(true);
 			t.setAutoScale(false);
 
@@ -691,27 +676,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 		// Update the cost
 		saveAsNeeded(context, price, round3Decimals(monthlyCost), dpRepository);
-	}
-
-	public void installSupportPrice(final UpdateContext context, final String code, final ProvSupportPrice aPrice) {
-		final var price = context.getPreviousSupport().computeIfAbsent(code, c -> {
-			// New instance price
-			final var newPrice = new ProvSupportPrice();
-			newPrice.setCode(c);
-			return newPrice;
-		});
-
-		// Merge the support type details
-		copyAsNeeded(context, price, p -> {
-			p.setLimit(aPrice.getLimit());
-			p.setMin(aPrice.getMin());
-			p.setRate(aPrice.getRate());
-			p.setType(aPrice.getType());
-		});
-
-		// Update the cost
-		saveAsNeeded(context, price, price.getCost(), aPrice.getCost(), (cR, c) -> price.setCost(cR),
-				sp2Repository::save);
 	}
 
 }
