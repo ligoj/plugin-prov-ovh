@@ -11,8 +11,6 @@ import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builde
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -287,13 +285,13 @@ class OvhPriceImportTest extends AbstractServerTest {
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), "UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/flavor.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/flavors.json").getInputStream(), "UTF-8"))));
-		httpServer.stubFor(get(urlEqualTo("/databaseAvaibility.json"))
+		httpServer.stubFor(get(urlEqualTo("/database-avaibility.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/databaseAvaibility.json").getInputStream(), "UTF-8"))));
+						new ClassPathResource("mock-server/ovh/database-avaibility.json").getInputStream(), "UTF-8"))));
 		httpServer.stubFor(
-				get(urlEqualTo("/databaseCapabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/databaseCapabilities.json").getInputStream(),
+								new ClassPathResource("mock-server/ovh/database-capabilities.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
@@ -307,14 +305,15 @@ class OvhPriceImportTest extends AbstractServerTest {
 						new ClassPathResource("mock-server/ovh/v2/flavors.json").getInputStream(), "UTF-8"))));
 
 		httpServer.stubFor(
-				get(urlEqualTo("/v2/databaseAvaibility.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/v2/database-avaibility.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/v2/databaseAvaibility.json").getInputStream(),
+								new ClassPathResource("mock-server/ovh/v2/database-avaibility.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(
-				get(urlEqualTo("/v2/databaseCapabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/v2/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/v2/databaseCapabilities.json").getInputStream(),
+								new ClassPathResource(
+										"mock-server/ovh/v2/database-capabilities.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/v2/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(

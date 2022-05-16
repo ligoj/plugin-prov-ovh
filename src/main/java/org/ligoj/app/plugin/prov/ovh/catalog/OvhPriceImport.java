@@ -67,11 +67,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	public static final String CONF_API_PRICES = ProvOvhPluginResource.KEY + ":prices-url";
 
 	/**
-	 * Name space for local configuration files
-	 */
-	protected static final String PREFIX = "digitalocean";
-
-	/**
 	 * Configuration key used for enabled instance type pattern names. When value is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_ITYPE = ProvOvhPluginResource.KEY + ":instance-type";
@@ -127,16 +122,16 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
 
-	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/databaseAvaibility.json"; // Public:
+	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/database-availability.json"; // Public:
 																							// "/cloud/project/%s/database/availability"
 
-	public static final String OVH_CAPABILITIES_DATABASE_PATH = "/databaseCapabilities.json"; // Public:
+	public static final String OVH_CAPABILITIES_DATABASE_PATH = "/database-capabilities.json"; // Public:
 																								// "/cloud/project/%s/database/capabilities"
 
 	/**
 	 * Default pricing URL.
 	 */
-	protected static final String DEFAULT_API_PRICES = "https://da9smdsh48mvy.cloudfront.net"; // https://ovh.ligoj.io";
+	protected static final String DEFAULT_API_PRICES = "https://da9smdsh48mvy.cloudfront.net/cloud"; // https://ovh.ligoj.io";
 
 	private static final TypeReference<Map<String, ProvLocation>> MAP_LOCATION = new TypeReference<>() {
 		// Nothing to extend
