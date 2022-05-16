@@ -646,8 +646,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
 					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(),aType.getStorage()
 					,databasePrice.getTerm(),plan.getBackupRetention(),plan.getDescription()));
-			
-			//,plan.getBackupRetention(),plan.getDescription()  ,\"backupRetention\":\"%s\",\"description\":\"%s\"
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);
