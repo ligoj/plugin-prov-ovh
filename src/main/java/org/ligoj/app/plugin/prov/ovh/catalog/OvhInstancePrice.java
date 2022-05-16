@@ -11,35 +11,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhInstancePrice {
 
+	@Getter
 	private double monthlyPriceValue;
 
-	private String monthlyPriceCurrencyCode;
-
+	@Getter
 	private double priceValue;
 
-	private String priceCurrencyCode;
-
+	@Getter
+	@Setter
 	private String region;
 
+	@Setter
+	@Getter
 	private String flavorId;
-
-	private String flavorName;
 
 	@JsonProperty("monthlyPrice")
 	private void getMonthlyPrice(final Map<String, Object> monthlyPrice) {
 		this.monthlyPriceValue = ((Number) monthlyPrice.get("value")).doubleValue();
-		this.monthlyPriceCurrencyCode = (String) monthlyPrice.get("currencyCode");
 	}
 
 	@JsonProperty("price")
 	private void getPrice(final Map<String, Object> price) {
 		this.priceValue = (double) price.get("value");
-		this.priceCurrencyCode = (String) price.get("currencyCode");
 	}
 
 }

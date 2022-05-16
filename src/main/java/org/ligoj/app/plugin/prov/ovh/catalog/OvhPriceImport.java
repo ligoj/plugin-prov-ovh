@@ -95,7 +95,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Configuration key used for enabled regions pattern names. When value is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_REGIONS = ProvOvhPluginResource.KEY + ":regions";
-	
+
 	/**
 	 * Configuration key used for flavor pattern names. When value is <code>null</code>, no restriction.
 	 */
@@ -282,10 +282,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							Function.identity()));
 			databasesAvaibility.stream()
 					.filter(c -> isEnabledEngine(context, c.getEngine())
-							&& isEnabledDatabaseType(context, c.getFlavor()) 
-							&& enginesByName.containsKey(c.getEngine())
-							&& flavorsByName.containsKey(c.getFlavor())
-							&& plansByName.containsKey(c.getPlan()))
+							&& isEnabledDatabaseType(context, c.getFlavor()) && enginesByName.containsKey(c.getEngine())
+							&& flavorsByName.containsKey(c.getFlavor()) && plansByName.containsKey(c.getPlan()))
 					.forEach(c -> {
 						final var engine = c.getEngine();
 						final var region = c.getRegion().toLowerCase();
@@ -296,7 +294,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							log.warn("Price not found for plan code {}", codePricePlan);
 							return;
 						}
-						var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()));
+						var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c);
 						// Install monthly based price
 						installDatabasePrice(context, monthlyTerm, monthlyTerm.getCode() + "/" + codePricePlan, type,
 								pricePlan.getMonthlyPrice(), engine, null, false, region);
@@ -428,7 +426,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	private void installStoragePrices(final UpdateContext context, final OvhAllPrices prices) {
 		nextStep(context, "install-vm-storage");
-		
+
 		installStorage(context, prices.getSnapshots(), p -> "snapshots", (t, p) -> {
 			t.setIops(7500);
 			t.setThroughput(300);
@@ -476,7 +474,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setOptimized(ProvStorageOptimized.IOPS);
 
 		});
-		
+
 		installStorage(context, prices.getArchive(), p -> "archive", (t, p) -> {
 			t.setIops(7500);
 			t.setThroughput(300);
@@ -627,7 +625,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Install a new database type as needed.
 	 */
 	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-			final OvhDatabaseFlavor aType) {
+			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType) {
 		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
@@ -642,6 +640,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setRam(aType.getMemory() * 1024.0); // Convert to MiB
 			t.setConstant(true);
 			t.setAutoScale(false);
+			t.setDescription(String.format(
+					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\",\"maxNodeNumber\":\"%s\",\"network\":\"%s\"}",
+					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
+					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork()));
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);

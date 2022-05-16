@@ -19,6 +19,7 @@ public class OvhStorage {
 
 	private String region;
 
+	@Setter
 	@JsonIgnore
 	private double price;
 
