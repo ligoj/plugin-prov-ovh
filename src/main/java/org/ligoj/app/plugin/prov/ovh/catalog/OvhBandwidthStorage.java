@@ -11,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhBandwidthStorage {
 
@@ -20,6 +18,7 @@ public class OvhBandwidthStorage {
 
 	private String currencyCode;
 
+	@Setter
 	@JsonProperty("region")
 	private String region;
 

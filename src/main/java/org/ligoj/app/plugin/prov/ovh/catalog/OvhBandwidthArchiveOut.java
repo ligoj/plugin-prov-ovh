@@ -13,8 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-@Getter
-@Setter
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhBandwidthArchiveOut  {
 	
@@ -22,6 +21,7 @@ public class OvhBandwidthArchiveOut  {
 	
 	private String currencyCode;
 	
+	@Setter
 	@JsonProperty("region")
 	private String region;
 	
