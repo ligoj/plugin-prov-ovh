@@ -26,29 +26,33 @@ JSON.stringify($.makeArray(jQuery('tr[data-price]'))
     }
 )));</code>
  */
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhDatabasePrice {
 
 	/**
 	 * Monthly price,
 	 */
+	@Getter
 	private Double monthlyPrice;
 
 	/**
 	 * Hourly price.
 	 */
+	@Getter
 	private Double hourlyPrice;
 
 	/**
 	 * Term code code corresponding to the commitment.
 	 */
+	@Getter
+	@Setter
 	private String term;
 
 	/**
 	 * Plan's code built like this : <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>.
 	 */
+	@Getter
+	@Setter
 	private String planCode;
 
 	@JsonProperty("all")

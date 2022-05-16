@@ -294,7 +294,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							log.warn("Price not found for plan code {}", codePricePlan);
 							return;
 						}
-						var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c);
+						var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c,pricePlan,plansByName.get(c.getPlan()));
 						// Install monthly based price
 						installDatabasePrice(context, monthlyTerm, monthlyTerm.getCode() + "/" + codePricePlan, type,
 								pricePlan.getMonthlyPrice(), engine, null, false, region);
@@ -625,7 +625,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Install a new database type as needed.
 	 */
 	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType) {
+			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType , final OvhDatabasePrice databasePrice, final OvhDatabasePlan plan ) {
 		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
@@ -641,9 +641,13 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setConstant(true);
 			t.setAutoScale(false);
 			t.setDescription(String.format(
-					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\",\"maxNodeNumber\":\"%s\",\"network\":\"%s\"}",
+					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
+					+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"term\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
 					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
-					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork()));
+					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(),aType.getStorage()
+					,databasePrice.getTerm(),plan.getBackupRetention(),plan.getDescription()));
+			
+			//,plan.getBackupRetention(),plan.getDescription()  ,\"backupRetention\":\"%s\",\"description\":\"%s\"
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);

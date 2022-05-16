@@ -12,14 +12,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhStorage {
 
+	@Getter
+	@Setter
 	private String region;
 
-	@Setter
+	@Getter
 	@JsonIgnore
 	private double price;
 
