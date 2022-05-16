@@ -6,5 +6,6 @@
     {"all": {"monthly":"$217.84 /month/node","hourly":"$0.2991 /hour/node"},"term":"hourly","planCode":"databases.mysql-essential-db1-15.hour.consumption","regions":"all"},
 	{"all": {"monthly":"$278.69 /month/node","hourly":"$0.3826 /hour/node"},"term":"hourly","planCode":"databases.postgresql-business-db1-15.hour.consumption","regions":"all"},
     {"all": {"monthly": "$2,636.02","hourly": "$3.6185" }, "term": "hourly","planCode": "databases.mongodb-enterprise-db1-60.hour.consumption","regions": "all"},
-    {"all": {"monthly": "$1,118.42","hourly": "$1.5353"},"term": "hourly","planCode": "databases.mysql-business-db1-60.hour.consumption","regions": "all"}
+    {"all": {"monthly": "$1,118.42","hourly": "$1.5353"},"term": "hourly","planCode": "databases.mysql-business-db1-60.hour.consumption","regions": "all"},
+    {"all": {"monthly": "$1,118.42","hourly": "$1.5353"},"term": "hourly","planCode": "databases.mysql-business-DISABLE.hour.consumption","regions": "all"}
 ]

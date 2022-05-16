@@ -118,22 +118,5 @@
         "minDiskSize": 0,
         "maxDiskSize": 0,
         "status": "STABLE"
-    },{
-        "engine": "error",
-        "version": "2",
-        "plan": "essential",
-        "default": false,
-        "region": "GRA7",
-        "flavor": "db1-7",
-        "startDate": "2021-11-02",
-        "endOfLife": null,
-        "upstreamEndOfLife": null,
-        "network": "public",
-        "backup": "automatic",
-        "minNodeNumber": 1,
-        "maxNodeNumber": 1,
-        "minDiskSize": 0,
-        "maxDiskSize": 0,
-        "status": "STABLE"
     }
 ]

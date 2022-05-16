@@ -23,7 +23,8 @@
     {"region":"SBG5","monthlyPrice":{"value":0.08,"currencyCode":"EUR"},"price":{"value":0.00011,"currencyCode":"EUR"},"volumeName":"volume.high-speed"},
     {"region":"GRA7","monthlyPrice":{"currencyCode":"EUR","value":0.08},"price":{"currencyCode":"EUR","value":0.00011},"volumeName":"volume.high-speed"},
     {"region":"GRA7","monthlyPrice":{"currencyCode":"EUR","value":0.04},"price":{"value":5e-05,"currencyCode":"EUR"},"volumeName":"volume.classic"},
-    {"region":"_SOME_","monthlyPrice":{"currencyCode":"EUR","value":0.04},"price":{"value":5e-05,"currencyCode":"EUR"},"volumeName":"volume.classic"}
+    {"region":"_SOME_","monthlyPrice":{"currencyCode":"EUR","value":0.04},"price":{"value":5e-05,"currencyCode":"EUR"},"volumeName":"volume.classic"},
+    {"region":"SBG5","monthlyPrice":{"value":0.08,"currencyCode":"EUR"},"price":{"value":0.00011,"currencyCode":"EUR"},"volumeName":"volume.high-speed-gen2"}
 ],
     
 "instances":[
@@ -34,7 +35,9 @@
     {"region":"SBG5","flavorName":"r2-60","flavorId":"1a5fddab-4ddc-4619-ad29-09932b6bcb9f","price":{"value":0.2,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":72}},
     {"region":"GRA7","flavorName":"t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
     {"region":"GRA7","flavorName":"t1-some","flavorId":"_ERROR_","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
-    {"region":"_SOME_","flavorName":"t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}}
+    {"region":"_SOME_","flavorName":"t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
+    {"region":"GRA7","flavorName":"suse-t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e-suse","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
+    {"region":"SGB5","flavorName":"type/t1/180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e-typefail","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}}
 ],
 
 "snapshots":[
