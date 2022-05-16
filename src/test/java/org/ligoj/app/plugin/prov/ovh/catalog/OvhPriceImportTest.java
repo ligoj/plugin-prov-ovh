@@ -13,9 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -66,11 +64,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 /**
  * Test class of {@link OvhPriceImport}
@@ -179,13 +172,14 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 	@Test
 	void installOffLine() throws Exception {
-		
+
 		configuration.put(OvhPriceImport.CONF_DTYPE, ".*(db1|db2).*");
 		configuration.put(OvhPriceImport.CONF_OS, "(WINDOWS|LINUX|CENTOS)");
 		configuration.put(OvhPriceImport.CONF_ITYPE, ".*-.*");
-		configuration.put(OvhPriceImport.CONF_ENGINE, "(mongodb|mysql|postgresql|kafka|redis|opensearch|kafkaMirrorMaker)");
+		configuration.put(OvhPriceImport.CONF_ENGINE,
+				"(mongodb|mysql|postgresql|kafka|redis|opensearch|kafkaMirrorMaker)");
 		configuration.put(OvhPriceImport.CONF_FLAVOR, "(db1|db2).*");
-		
+
 		// Install a new configuration
 		final var quote = install();
 
@@ -270,131 +264,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());// 1
 		Assertions.assertNull(lookupB.getPrice().getStorageEngine());
 
-		// Check the databasePlan
-		var databasePlan = new OvhDatabasePlan();
-		databasePlan.setBackupRetention("essential");
-		databasePlan.setDescription("Essential plan");
-		databasePlan.setName("P2D");
-		Assertions.assertEquals("essential", databasePlan.getBackupRetention());
-		Assertions.assertEquals("Essential plan", databasePlan.getDescription());
-		Assertions.assertEquals("P2D", databasePlan.getName());
-
-		// Check databasePrice
-		var databasePrice = new OvhDatabasePrice();
-		databasePrice.setHourlyPrice(0.0314);
-		databasePrice.setMonthlyPrice(22.82);
-		databasePrice.setTerm("hourly");
-		Assertions.assertEquals(0.0314, databasePrice.getHourlyPrice());
-		Assertions.assertEquals(22.82, databasePrice.getMonthlyPrice());
-		Assertions.assertEquals("hourly", databasePrice.getTerm());
-
-		// Check databaseFlavor
-		var databaseFlavor = new OvhDatabaseFlavor();
-		databaseFlavor.setCore(2);
-		databaseFlavor.setMemory(7);
-		databaseFlavor.setStorage(50);
-		databaseFlavor.setName("db1-7");
-		Assertions.assertEquals(2, databaseFlavor.getCore());
-		Assertions.assertEquals(7, databaseFlavor.getMemory());
-		Assertions.assertEquals(50, databaseFlavor.getStorage());
-		Assertions.assertEquals("db1-7", databaseFlavor.getName());
-
-		// Check DatabaseAvaibility
-		var databaseAvaibility = new OvhDatabaseAvaibility();
-		databaseAvaibility.setBackup("automatic");
-		databaseAvaibility.setDefaultt(false);
-		databaseAvaibility.setEndOfLife(null);
-		databaseAvaibility.setEngine("mongodb");
-		databaseAvaibility.setFlavor("db1-2");
-		databaseAvaibility.setMaxDiskSize(25);
-		databaseAvaibility.setMinDiskSize(25);
-		databaseAvaibility.setMaxNodeNumber(1);
-		databaseAvaibility.setMinNodeNumber(1);
-		databaseAvaibility.setNetwork("public");
-		databaseAvaibility.setPlan("essential");
-		databaseAvaibility.setRegion("GRA7");
-		databaseAvaibility.setStartDate(new Date(2021 - 12 - 17));
-		databaseAvaibility.setStatus("STABLE");
-		databaseAvaibility.setUpstreamEndOfLife(null);
-		databaseAvaibility.setVersion("4.2");
-
-		Assertions.assertEquals("automatic", databaseAvaibility.getBackup());
-		Assertions.assertNull(databaseAvaibility.getEndOfLife());
-		Assertions.assertEquals("mongodb", databaseAvaibility.getEngine());
-		Assertions.assertEquals("db1-2", databaseAvaibility.getFlavor());
-		Assertions.assertEquals(25, databaseAvaibility.getMaxDiskSize());
-		Assertions.assertEquals(1, databaseAvaibility.getMaxNodeNumber());
-		Assertions.assertEquals(25, databaseAvaibility.getMinDiskSize());
-		Assertions.assertEquals(1, databaseAvaibility.getMinNodeNumber());
-		Assertions.assertEquals("public", databaseAvaibility.getNetwork());
-		Assertions.assertEquals("essential", databaseAvaibility.getPlan());
-		Assertions.assertEquals("GRA7", databaseAvaibility.getRegion());
-		Assertions.assertEquals(new Date(2021 - 12 - 17), databaseAvaibility.getStartDate());
-		Assertions.assertEquals("STABLE", databaseAvaibility.getStatus());
-		Assertions.assertNull(databaseAvaibility.getUpstreamEndOfLife());
-		Assertions.assertEquals("4.2", databaseAvaibility.getVersion());
-		Assertions.assertFalse(databaseAvaibility.isDefaultt());
-		
-		
-		// databaseCapabilities
-		var databaseCapabilities = new OvhDatabaseCapabilities();
-		List<OvhDatabaseFlavor> databaseFlavors = new ArrayList<OvhDatabaseFlavor>();
-		databaseFlavors.add(databaseFlavor);
-		databaseCapabilities.setFlavors(databaseFlavors);
-		
-		// Check BandwidthArchiveIn
-		var BandwidthArchiveIn = new OvhBandwidthArchiveIn();
-		BandwidthArchiveIn.setValue(0.01);
-		BandwidthArchiveIn.setCurrencyCode("EUR");
-		BandwidthArchiveIn.setRegion("gra7");
-		Assertions.assertEquals(0.01, BandwidthArchiveIn.getValue());
-		Assertions.assertEquals("EUR", BandwidthArchiveIn.getCurrencyCode());
-		Assertions.assertEquals("gra7", BandwidthArchiveIn.getRegion());
-
-		// Check BandwidthArchiveOut
-		var BandwidthArchiveOut = new OvhBandwidthArchiveOut();
-		BandwidthArchiveOut.setValue(0.01);
-		BandwidthArchiveOut.setCurrencyCode("EUR");
-		BandwidthArchiveOut.setRegion("gra7");
-		Assertions.assertEquals(0.01, BandwidthArchiveOut.getValue());
-		Assertions.assertEquals("EUR", BandwidthArchiveOut.getCurrencyCode());
-		Assertions.assertEquals("gra7", BandwidthArchiveOut.getRegion());
-
-		// Check BandwidthStorage
-		var BandwidthStorage = new OvhBandwidthStorage();
-		BandwidthStorage.setValue(0.01);
-		BandwidthStorage.setCurrencyCode("EUR");
-		BandwidthStorage.setRegion("gra7");
-		Assertions.assertEquals(0.01, BandwidthStorage.getValue());
-		Assertions.assertEquals("EUR", BandwidthStorage.getCurrencyCode());
-		Assertions.assertEquals("gra7", BandwidthStorage.getRegion());
-		
-		//Check Databases 
-		var databases = new OvhDatabases();
-		List<OvhDatabaseAvaibility> databasesAvaibilitys = new ArrayList<OvhDatabaseAvaibility>() ;
-		List<OvhDatabaseCapabilities> databasesCapabilities= new ArrayList<OvhDatabaseCapabilities>();
-		databasesAvaibilitys.add(databaseAvaibility);
-		databasesCapabilities.add(databaseCapabilities);
-		databases.setDatabaseAvaibility(databasesAvaibilitys);
-		databases.setDatabaseCapabilities(databasesCapabilities);
-		Assertions.assertEquals(databaseAvaibility.getEngine(), databases.getDatabaseAvaibility().get(0).getEngine());
-		Assertions.assertEquals(databaseCapabilities.getFlavors().get(0).getCore(),  databases.getDatabaseCapabilities().get(0).getFlavors().get(0).getCore());
-		
-		// Check AllPrice
-		var allPrice = new OvhAllPrices();
-		List <OvhBandwidthArchiveIn> BandwidthArchiveIns = new ArrayList<OvhBandwidthArchiveIn>();
-		BandwidthArchiveIns.add(BandwidthArchiveIn);
-		List <OvhBandwidthArchiveOut> BandwidthArchiveOuts = new ArrayList<OvhBandwidthArchiveOut>();
-		BandwidthArchiveOuts.add(BandwidthArchiveOut);
-		List <OvhBandwidthStorage> BandwidthStorages = new ArrayList<OvhBandwidthStorage>();
-		BandwidthStorages.add(BandwidthStorage);
-		allPrice.setBandwidthArchiveIn(BandwidthArchiveIns);
-		allPrice.setBandwidthArchiveOut(BandwidthArchiveOuts);
-		allPrice.setBandwidthStorage(BandwidthStorages);
-		Assertions.assertEquals(0.01, allPrice.getBandwidthArchiveIn().get(0).getValue());
-		Assertions.assertEquals(0.01, allPrice.getBandwidthArchiveOut().get(0).getValue());
-		Assertions.assertEquals(0.01, allPrice.getBandwidthStorage().get(0).getValue());
-		
 		// var sLookup = qsResource.lookup(subscription,
 		// QuoteStorageQuery.builder().size(5).latency(Rate.LOW).location("gra7"));
 
@@ -459,32 +328,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(minCost, quote.getCost().getMin(), DELTA);
 		Assertions.assertEquals(maxCost, quote.getCost().getMax(), DELTA);
 		checkStorage(quote.getStorages());
-		checkLocation(quote.getLocations());
 		return checkInstance(quote.getInstances().get(0), instanceCost);
 	}
 
-	private void checkLocation(List<ProvLocation> locations) {
-		var location1 = new OvhRegion();
-		location1.setName("gra7");
-
-		var location2 = new OvhRegion();
-		location2.setName("sgb5");
-
-		List<OvhRegion> Locations = new ArrayList<OvhRegion>();
-		;
-
-		Locations.add(location1);
-		Locations.add(location2);
-
-		var Regions = new OvhRegions();
-		Regions.setRegions(Locations);
-		Assertions.assertEquals("gra7", Regions.getRegions().get(0).getName());
-
-		var regionPrice = new OvhRegionPrices();
-		regionPrice.setRegion("gra7");
-		Assertions.assertEquals("gra7", regionPrice.getRegion());
-
-	}
 
 	private ProvQuoteInstance checkInstance(final ProvQuoteInstance instance, final double cost) {
 		Assertions.assertEquals(cost, instance.getCost(), DELTA);
@@ -507,12 +353,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 																										// Standard}
 		Assertions.assertNull(price.getType().getProcessor());
 		Assertions.assertFalse(price.getType().isAutoScale());
-
-		var flavor = new OvhFlavor();
-		flavor.setRegion("gra7");
-		flavor.setType("ovh.ssd.ram");
-		Assertions.assertEquals("gra7", flavor.getRegion());
-		Assertions.assertEquals("ovh.ssd.ram", flavor.getType());
 
 		return instance;
 	}
@@ -547,47 +387,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// Assertions.assertEquals(4096, typeS.getMaximal().intValue());
 		Assertions.assertEquals(Rate.GOOD, typeS.getLatency());
 		Assertions.assertEquals(ProvStorageOptimized.DURABILITY, typeS.getOptimized());
-
-		var storage2 = new OvhStorage();
-		storage2.setRegion(storage.getPrice().getLocation().getName());
-		storage2.setPrice(storage.getCost());
-		Assertions.assertEquals(1.0, storage2.getPrice());
-		Assertions.assertEquals("gra7", storage2.getRegion());
-
-		var archive = storages.get(2);
-		Assertions.assertEquals(0.2, archive.getCost(), DELTA);
-		Assertions.assertEquals(100, archive.getSize(), DELTA);
-		// Assertions.assertNotNull(archive.getQuoteInstance());
-		final var typeA = archive.getPrice().getType();
-		Assertions.assertEquals("archive", typeA.getCode());
-		Assertions.assertEquals("Cloud Archive", typeA.getName());
-		Assertions.assertEquals(7500, typeA.getIops());
-		Assertions.assertEquals(300, typeA.getThroughput());
-		Assertions.assertEquals(0d, archive.getPrice().getCostTransaction(), DELTA);
-		Assertions.assertEquals(1, typeA.getMinimal());
-		// Assertions.assertEquals(4096, typeA.getMaximal().intValue());
-		Assertions.assertEquals(Rate.WORST, typeA.getLatency());
-		Assertions.assertEquals(ProvStorageOptimized.DURABILITY, typeA.getOptimized());
-
-		var archive2 = new OvhArchive();
-		archive2.setRegion(archive.getPrice().getLocation().getName());
-		archive2.setCurrencyCode("EUR");
-		archive2.setMonthlyPrice(archive.getCost());
-		Assertions.assertEquals(0.2, archive2.getMonthlyPrice());
-		Assertions.assertEquals("EUR", archive2.getCurrencyCode());
-		Assertions.assertEquals("gra7", archive2.getRegion());
-
-		var Snapshot = new OvhSnapshot();
-		Snapshot.setRegion("gra7");
-		Snapshot.setCurrencyCode("EUR");
-		Snapshot.setValue("2e-05");
-		Snapshot.setMonthlyPriceValue(0.01);
-		Snapshot.setMonthlyPriceCurrencyCode("EUR");
-		Assertions.assertEquals("EUR", Snapshot.getMonthlyPriceCurrencyCode());
-		Assertions.assertEquals("EUR", Snapshot.getCurrencyCode());
-		Assertions.assertEquals("gra7", Snapshot.getRegion());
-		Assertions.assertEquals("2e-05", Snapshot.getValue());
-		Assertions.assertEquals(0.01, Snapshot.getMonthlyPriceValue());
 
 		return volume;
 	}
@@ -692,11 +491,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertTrue(createStorage.getId() > 0);
 
 		/*
-		 * New instance2 for "s-1vcpu-1gb" var ivo2 = new QuoteInstanceEditionVo();
-		 * ivo2.setCpu(1d); ivo2.setRam(1); ivo2.setLocation("gra7");
-		 * ivo2.setPrice(lookup.getPrice().getId()); ivo2.setName("server2");
-		 * ivo2.setMaxQuantity(2); ivo2.setSubscription(subscription); var
-		 * createInstance2 = qiResource.create(ivo2);
+		 * New instance2 for "s-1vcpu-1gb" var ivo2 = new QuoteInstanceEditionVo(); ivo2.setCpu(1d); ivo2.setRam(1);
+		 * ivo2.setLocation("gra7"); ivo2.setPrice(lookup.getPrice().getId()); ivo2.setName("server2");
+		 * ivo2.setMaxQuantity(2); ivo2.setSubscription(subscription); var createInstance2 = qiResource.create(ivo2);
 		 * Assertions.assertTrue(createInstance2.getTotal().getMin() >= 1);
 		 * Assertions.assertTrue(createInstance2.getId() > 0);
 		 */
@@ -783,8 +580,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Return the subscription identifier of the given project. Assumes there is
-	 * only one subscription for a service.
+	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
 		return getSubscription(project, ProvOvhPluginResource.KEY);
