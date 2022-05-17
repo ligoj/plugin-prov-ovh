@@ -11,8 +11,6 @@ import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builde
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -287,13 +285,15 @@ class OvhPriceImportTest extends AbstractServerTest {
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), "UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/flavor.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 				IOUtils.toString(new ClassPathResource("mock-server/ovh/flavors.json").getInputStream(), "UTF-8"))));
-		httpServer.stubFor(get(urlEqualTo("/databaseAvaibility.json"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/databaseAvaibility.json").getInputStream(), "UTF-8"))));
 		httpServer.stubFor(
-				get(urlEqualTo("/databaseCapabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/database-availability.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/databaseCapabilities.json").getInputStream(),
+								new ClassPathResource("mock-server/ovh/database-availability.json").getInputStream(),
+								"UTF-8"))));
+		httpServer.stubFor(
+				get(urlEqualTo("/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toString(
+								new ClassPathResource("mock-server/ovh/database-capabilities.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
@@ -307,14 +307,14 @@ class OvhPriceImportTest extends AbstractServerTest {
 						new ClassPathResource("mock-server/ovh/v2/flavors.json").getInputStream(), "UTF-8"))));
 
 		httpServer.stubFor(
-				get(urlEqualTo("/v2/databaseAvaibility.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/v2/database-availability.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/v2/databaseAvaibility.json").getInputStream(),
+								new ClassPathResource("mock-server/ovh/v2/database-availability.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(
-				get(urlEqualTo("/v2/databaseCapabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlEqualTo("/v2/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/ovh/v2/databaseCapabilities.json").getInputStream(),
+								new ClassPathResource("mock-server/ovh/v2/database-capabilities.json").getInputStream(),
 								"UTF-8"))));
 		httpServer.stubFor(get(urlEqualTo("/v2/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
@@ -330,7 +330,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		checkStorage(quote.getStorages());
 		return checkInstance(quote.getInstances().get(0), instanceCost);
 	}
-
 
 	private ProvQuoteInstance checkInstance(final ProvQuoteInstance instance, final double cost) {
 		Assertions.assertEquals(cost, instance.getCost(), DELTA);
@@ -406,11 +405,13 @@ class OvhPriceImportTest extends AbstractServerTest {
 	@Test
 	void installOnLine() throws Exception {
 		configuration.delete(OvhPriceImport.CONF_API_PRICES);
-		configuration.put(OvhPriceImport.CONF_REGIONS, "(sfo1|sfo2|nyc1|sgp1)");
-		configuration.put(OvhPriceImport.CONF_ITYPE, "(m6-|s-).*");
-		configuration.put(OvhPriceImport.CONF_DTYPE, ".*(db1|db2).*");
+		configuration.put(OvhPriceImport.CONF_REGIONS, "(gra|sbg).*");
+		configuration.put(OvhPriceImport.CONF_ITYPE, ".*");
+		configuration.put(OvhPriceImport.CONF_DTYPE, ".*");
 		configuration.put(OvhPriceImport.CONF_ENGINE, "(MYSQL)");
 		configuration.put(OvhPriceImport.CONF_OS, "(WINDOWS|LINUX|CENTOS)");
+		configuration.put(OvhPriceImport.CONF_FLAVOR, ".*");
+
 
 		final var quote = installAndConfigure();
 		Assertions.assertTrue(quote.getCost().getMin() >= 15);
