@@ -277,8 +277,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							Function.identity()));
 			databasesAvaibility.stream()
 					.filter(c -> isEnabledEngine(context, c.getEngine())
-							&& isEnabledDatabaseType(context, c.getFlavor()) && enginesByName.containsKey(c.getEngine())
-							&& flavorsByName.containsKey(c.getFlavor()) && plansByName.containsKey(c.getPlan()))
+							&& isEnabledDatabaseType(context, c.getFlavor()) 
+							&& enginesByName.containsKey(c.getEngine())
+							&& flavorsByName.containsKey(c.getFlavor()) 
+							&& plansByName.containsKey(c.getPlan()))
 					.forEach(c -> {
 						final var engine = c.getEngine();
 						final var region = c.getRegion().toLowerCase();
