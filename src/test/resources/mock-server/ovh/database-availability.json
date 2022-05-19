@@ -21,7 +21,7 @@
         "version": "8",
         "plan": "essential",
         "default": false,
-        "region": "GRA7",
+        "region": "GRA",
         "flavor": "db1-15",
         "startDate": "2021-10-20",
         "endOfLife": null,

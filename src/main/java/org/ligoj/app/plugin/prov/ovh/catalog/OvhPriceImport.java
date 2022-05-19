@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -123,7 +124,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
 
 	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/database-availability.json"; // Public:
-																							// "/cloud/project/%s/database/availability"
+																								// "/cloud/project/%s/database/availability"
 
 	public static final String OVH_CAPABILITIES_DATABASE_PATH = "/database-capabilities.json"; // Public:
 																								// "/cloud/project/%s/database/capabilities"
@@ -277,30 +278,39 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							Function.identity()));
 			databasesAvaibility.stream()
 					.filter(c -> isEnabledEngine(context, c.getEngine())
-							&& isEnabledDatabaseType(context, c.getFlavor()) 
-							&& enginesByName.containsKey(c.getEngine())
-							&& flavorsByName.containsKey(c.getFlavor()) 
-							&& plansByName.containsKey(c.getPlan()))
-					.forEach(c -> {
-						final var engine = c.getEngine();
-						final var region = c.getRegion().toLowerCase();
-						final var codeType = "%s/%s".formatted(c.getPlan(), c.getFlavor());
-						final var codePricePlan = "%s-%s-%s".formatted(c.getEngine(), c.getPlan(), c.getFlavor());
-						final var pricePlan = pricesByCode.get(codePricePlan);
-						if (pricePlan == null) {
-							log.warn("Price not found for plan code {}", codePricePlan);
-							return;
-						}
-						var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c,pricePlan,plansByName.get(c.getPlan()));
-						// Install monthly based price
-						installDatabasePrice(context, monthlyTerm, monthlyTerm.getCode() + "/" + codePricePlan, type,
-								pricePlan.getMonthlyPrice(), engine, null, false, region);
-
-						// Install hourly based price
-						installDatabasePrice(context, hourlyTerm, hourlyTerm.getCode() + "/" + codePricePlan, type,
-								pricePlan.getHourlyPrice(), engine, null, false, region);
-					});
+							&& isEnabledDatabaseType(context, c.getFlavor()) && enginesByName.containsKey(c.getEngine())
+							&& flavorsByName.containsKey(c.getFlavor()) && plansByName.containsKey(c.getPlan()))
+					.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
+							pricesByCode, c));
 		}
+	}
+
+	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
+			final ProvInstancePriceTerm monthlyTerm, final Map<String, OvhDatabaseFlavor> flavorsByName,
+			final Map<String, OvhDatabasePlan> plansByName, final Map<String, OvhDatabasePrice> pricesByCode,
+			final OvhDatabaseAvaibility c) {
+		final var engine = c.getEngine();
+		final var regionGroup = c.getRegion().toLowerCase();
+		context.getRegions().entrySet().stream().filter(r -> r.getKey().toLowerCase().startsWith(regionGroup))
+				.map(Entry::getValue).distinct().forEach(region -> {
+
+					final var codeType = "%s/%s".formatted(c.getPlan(), c.getFlavor());
+					final var codePricePlan = "%s-%s-%s".formatted(c.getEngine(), c.getPlan(), c.getFlavor());
+					final var pricePlan = pricesByCode.get(codePricePlan);
+					if (pricePlan == null) {
+						log.warn("Price not found for plan code {}", codePricePlan);
+						return;
+					}
+					var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c, pricePlan,
+							plansByName.get(c.getPlan()));
+					// Install monthly based price
+					installDatabasePrice(context, monthlyTerm, monthlyTerm.getCode() + "/" + codePricePlan, type,
+							pricePlan.getMonthlyPrice(), engine, null, false, region);
+
+					// Install hourly based price
+					installDatabasePrice(context, hourlyTerm, hourlyTerm.getCode() + "/" + codePricePlan, type,
+							pricePlan.getHourlyPrice(), engine, null, false, region);
+				});
 	}
 
 	private void installSupportTypes(final UpdateContext context) throws IOException {
@@ -544,12 +554,13 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os,
 			final ProvInstanceType type, final double monthlyCost, final ProvLocation region) {
-		final var price = context.getPrevious().computeIfAbsent(term.getCode() + "/" + type.getCode(), code -> {
-			// New instance price (not update mode)
-			final var newPrice = new ProvInstancePrice();
-			newPrice.setCode(code);
-			return newPrice;
-		});
+		final var price = context.getPrevious()
+				.computeIfAbsent(region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
+					// New instance price (not update mode)
+					final var newPrice = new ProvInstancePrice();
+					newPrice.setCode(code);
+					return newPrice;
+				});
 		copyAsNeeded(context, price, p -> {
 			p.setLocation(region);
 			p.setOs(os);
@@ -622,7 +633,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Install a new database type as needed.
 	 */
 	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType , final OvhDatabasePrice databasePrice, final OvhDatabasePlan plan ) {
+			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType, final OvhDatabasePrice databasePrice,
+			final OvhDatabasePlan plan) {
 		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
@@ -639,10 +651,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setAutoScale(false);
 			t.setDescription(String.format(
 					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
-					+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"term\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
+							+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"term\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
 					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
-					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(),aType.getStorage()
-					,databasePrice.getTerm(),plan.getBackupRetention(),plan.getDescription()));
+					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(), aType.getStorage(),
+					databasePrice.getTerm(), plan.getBackupRetention(), plan.getDescription()));
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);
@@ -657,8 +669,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
 			final String localCode, final ProvDatabaseType type, final double monthlyCost, final String engine,
-			final String storageEngine, final boolean byol, final String region) {
-		final var price = context.getPreviousDatabase().computeIfAbsent(region + "/" + localCode, c -> {
+			final String storageEngine, final boolean byol, final ProvLocation region) {
+		final var price = context.getPreviousDatabase().computeIfAbsent(region.getName() + "/" + localCode, c -> {
 			// New instance price
 			final var newPrice = new ProvDatabasePrice();
 			newPrice.setCode(c);
@@ -666,7 +678,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		});
 
 		copyAsNeeded(context, price, p -> {
-			p.setLocation(installRegion(context, region));
+			p.setLocation(region);
 			p.setEngine(engine.toUpperCase(Locale.ENGLISH));
 			p.setStorageEngine(storageEngine);
 			p.setLicense(null /* ProvInstancePrice.LICENSE_BYOL */);

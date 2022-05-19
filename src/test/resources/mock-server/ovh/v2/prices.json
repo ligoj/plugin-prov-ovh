@@ -1,56 +1,56 @@
 {
-"projectCreation":[{"value":10,"currencyCode":"EUR"}],
+"projectCreation":[{"value":10}],
 
 "storage":[
-    {"region":"GRA7","price":{"currencyCode":"EUR","value":2e-05},"monthlyPrice":{"currencyCode":"EUR","value":0.11}},
-    {"region":"SBG5","price":{"currencyCode":"EUR","value":2e-05},"monthlyPrice":{"currencyCode":"EUR","value":0.11}},
-    {"region":"_SOME_","price":{"currencyCode":"EUR","value":2e-05},"monthlyPrice":{"currencyCode":"EUR","value":0.11}}
+    {"region":"GRA7","price":{"value":2e-05},"monthlyPrice":{"value":0.011}},
+    {"region":"SBG5","price":{"value":2e-05},"monthlyPrice":{"value":0.011}},
+    {"region":"_SOME_","price":{"value":2e-05},"monthlyPrice":{"value":0.011}}
 ],
 
 "archive":[
-    {"region":"SBG5","monthlyPrice":{"value":0.012,"currencyCode":"EUR"}},
-    {"region":"GRA7","monthlyPrice":{"currencyCode":"EUR","value":0.012}},
-    {"region":"_SOME_","monthlyPrice":{"currencyCode":"EUR","value":0.012}}
+    {"region":"SBG5","monthlyPrice":{"value":0.012}},
+    {"region":"GRA7","monthlyPrice":{"value":0.012}},
+    {"region":"_SOME_","monthlyPrice":{"value":0.012}}
 ],
 
 "bandwidthArchiveIn":[
-    {"price":{"value":0.11,"currencyCode":"EUR"},"region":"GRA7"},
-    {"region":"SBG5","price":{"value":0.11,"currencyCode":"EUR"}},
-    {"region":"_SOME_","price":{"value":0.11,"currencyCode":"EUR"}}],
+    {"price":{"value":0.11},"region":"GRA7"},
+    {"region":"SBG5","price":{"value":0.11}},
+    {"region":"_SOME_","price":{"value":0.11}}],
 
 "volumes":[
-    {"region":"SBG5","price":{"value":5e-04,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":0.14},"volumeName":"volume.classic"},
-    {"region":"SBG5","monthlyPrice":{"value":0.18,"currencyCode":"EUR"},"price":{"value":0.00111,"currencyCode":"EUR"},"volumeName":"volume.high-speed"},
-    {"region":"GRA7","monthlyPrice":{"currencyCode":"EUR","value":0.18},"price":{"currencyCode":"EUR","value":0.00111},"volumeName":"volume.high-speed"},
-    {"region":"GRA7","monthlyPrice":{"currencyCode":"EUR","value":0.14},"price":{"value":5e-04,"currencyCode":"EUR"},"volumeName":"volume.classic"},
-    {"region":"_SOME_","monthlyPrice":{"currencyCode":"EUR","value":0.14},"price":{"value":5e-04,"currencyCode":"EUR"},"volumeName":"volume.classic"}
+    {"region":"SBG5","price":{"value":6e-05},"monthlyPrice":{"value":0.045},"volumeName":"volume.classic"},
+    {"region":"SBG5","monthlyPrice":{"value":0.18},"price":{"value":0.00111},"volumeName":"volume.high-speed"},
+    {"region":"GRA7","monthlyPrice":{"value":0.18},"price":{"value":0.00111},"volumeName":"volume.high-speed"},
+    {"region":"GRA7","monthlyPrice":{"value":0.045},"price":{"value":6e-05},"volumeName":"volume.classic"},
+    {"region":"_SOME_","monthlyPrice":{"value":0.045},"price":{"value":6e-05},"volumeName":"volume.classic"}
 ],
     
 "instances":[
-    {"region":"SBG5","monthlyPrice":{"value":326,"currencyCode":"EUR"},"price":{"value":1.003,"currencyCode":"EUR"},"flavorId":"e9e90064-01cb-47f3-a9b1-c46380d5bdb7","flavorName":"b2-120"},
-    {"region":"SBG5","flavorName":"win-r2-15-flex","flavorId":"d5acc03f-46cb-410b-821b-baadc550348e","monthlyPrice":{"value":63,"currencyCode":"EUR"},"price":{"value":0.273,"currencyCode":"EUR"}},
-    {"region":"SBG5","price":{"currencyCode":"EUR","value":0.099},"monthlyPrice":{"currencyCode":"EUR","value":33},"flavorId":"fc8c7a4b-aa5c-4b7c-8a97-287eec05c5ed","flavorName":"c2-7"},
-    {"region":"SBG5","price":{"currencyCode":"EUR","value":0.12},"monthlyPrice":{"value":7.99,"currencyCode":"EUR"},"flavorName":"s1-4","flavorId":"3c83dfbd-abdb-43d0-b041-3ac44009c2f7"},
-    {"region":"SBG5","flavorName":"r2-60","flavorId":"1a5fddab-4ddc-4619-ad29-09932b6bcb9f","price":{"value":0.3,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":73}},
-    {"region":"GRA7","flavorName":"t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e","monthlyPrice":{"value":4900,"currencyCode":"EUR"},"price":{"value":10.399,"currencyCode":"EUR"}},
-    {"region":"GRA7","flavorName":"t1-some","flavorId":"_ERROR_","monthlyPrice":{"value":4900,"currencyCode":"EUR"},"price":{"value":10.399,"currencyCode":"EUR"}},
-    {"region":"_SOME_","flavorName":"t1-180","flavorId":"8ab060cc-e259-454b-a4e0-1b81d6f8563e","monthlyPrice":{"value":4900,"currencyCode":"EUR"},"price":{"value":10.399,"currencyCode":"EUR"}}
+    {"region":"SBG5","monthlyPrice":{"value":390},"price":{"value":1.084},"flavorId":"e9e90064-01cb-47f3-a9b1-c46380d5bdb7","flavorName":"b2-120"},
+    {"region":"SBG5","flavorName":"win-r2-15","flavorId":"d5acc03f-46cb-410b-821b-baadc550348e","monthlyPrice":{"value":186},"price":{"value":0.207}},
+    {"region":"SBG5","price":{"value":0.107},"monthlyPrice":{"value":38.4},"flavorId":"fc8c7a4b-aa5c-4b7c-8a97-287eec05c5ed","flavorName":"c2-7"},
+    {"region":"SBG5","price":{"value":0.024},"monthlyPrice":{"value":8.39},"flavorName":"s1-4","flavorId":"3c83dfbd-abdb-43d0-b041-3ac44009c2f7"},
+    {"region":"SBG5","flavorName":"r2-60","flavorId":"1a5fddab-4ddc-4619-ad29-09932b6bcb9f","price":{"value":0.24},"monthlyPrice":{"value":86.39}},
+    {"region":"GRA7","flavorName":"c2-120","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99","monthlyPrice":{"value":582},"price":{"value":1.617}},
+    {"region":"GRA7","flavorName":"t1-some","flavorId":"_ERROR_","monthlyPrice":{"value":4900},"price":{"value":10.399}},
+    {"region":"_SOME_","flavorName":"c2-120","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99_SOME","monthlyPrice":{"value":4900},"price":{"value":10.399}}
 ],
 
 "snapshots":[
-    {"region":"GRA7","price":{"value":2e-04,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":0.11}},
-    {"region":"SBG5","price":{"value":2e-04,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":0.11}},
-    {"region":"_SOME_","price":{"value":2e-04,"currencyCode":"EUR"},"monthlyPrice":{"currencyCode":"EUR","value":0.11}}
+    {"region":"GRA7","price":{"value":2e-04},"monthlyPrice":{"value":0.11}},
+    {"region":"SBG5","price":{"value":2e-04},"monthlyPrice":{"value":0.11}},
+    {"region":"_SOME_","price":{"value":2e-04},"monthlyPrice":{"value":0.11}}
 ],
     
 "bandwidthStorage":[
-    {"region":"GRA7","price":{"currencyCode":"EUR","value":0.11}},
-    {"region":"SBG5","price":{"currencyCode":"EUR","value":0.11}},
-    {"region":"_SOME_","price":{"currencyCode":"EUR","value":0.11}}
+    {"region":"GRA7","price":{"value":0.11}},
+    {"region":"SBG5","price":{"value":0.11}},
+    {"region":"_SOME_","price":{"value":0.11}}
 ],
     
 "bandwidthArchiveOut":[
-    {"region":"GRA7","price":{"value":0.11,"currencyCode":"EUR"}},
-    {"region":"SBG5","price":{"currencyCode":"EUR","value":0.11}},
-    {"region":"_SOME_","price":{"currencyCode":"EUR","value":0.11}}
+    {"region":"GRA7","price":{"value":0.11}},
+    {"region":"SBG5","price":{"value":0.11}},
+    {"region":"_SOME_","price":{"value":0.11}}
 ]}

@@ -37,7 +37,7 @@
     },
     {
         "id": "d5acc03f-46cb-410b-821b-baadc550348e",
-        "name": "win-r2-15-flex",
+        "name": "win-r2-15",
         "region": "SBG5",
         "ram": 15000,
         "disk": 50,
@@ -180,20 +180,20 @@
         "quota": 0
     },
     {
-        "id": "8ab060cc-e259-454b-a4e0-1b81d6f8563e",
-        "name": "t1-180",
+        "id": "8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99",
+        "name": "c2-120",
         "region": "GRA7",
-        "ram": 180000,
-        "disk": 50,
-        "vcpus": 36,
-        "type": "ovh.raid-nvme.t1",
+        "ram": 120000,
+        "disk": 400,
+        "vcpus": 32,
+        "type": "ovh.ssd.cpu",
         "osType": "linux",
         "inboundBandwidth": 10000,
         "outboundBandwidth": 10000,
         "available": false,
         "planCodes": {
-            "monthly": "t1-180.monthly.postpaid",
-            "hourly": "t1-180.consumption"
+            "monthly": "c2-120.monthly.postpaid",
+            "hourly": "c2-120.consumption"
         },
         "capabilities": [
             {
