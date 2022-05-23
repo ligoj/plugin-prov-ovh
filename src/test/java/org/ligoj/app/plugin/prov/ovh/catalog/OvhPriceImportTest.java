@@ -199,7 +199,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("Gravelines", lookup.getPrice().getLocation().getDescription());
 		checkImportStatus();
 
-		// Check physical CPU
 		// CPU Intensive
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(4096).constant(true).build());
@@ -338,9 +337,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0.0, term.getPeriod());// 1
 		Assertions.assertEquals("c2-120", price.getType().getCode());
 		Assertions.assertEquals("c2-120", price.getType().getName());
-		Assertions.assertEquals("{Disk: 400, Network: 10000/10000}", price.getType().getDescription());// {Disk: 25,
-																										// Category:
-																										// Standard}
+		Assertions.assertEquals("{Disk: 400, Network: 10000/10000}", price.getType().getDescription());
 		Assertions.assertNull(price.getType().getProcessor());
 		Assertions.assertFalse(price.getType().isAutoScale());
 
