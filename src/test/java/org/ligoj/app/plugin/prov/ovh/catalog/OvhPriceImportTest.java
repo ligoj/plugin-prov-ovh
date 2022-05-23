@@ -175,7 +175,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		configuration.put(OvhPriceImport.CONF_OS, "(WINDOWS|LINUX|CENTOS)");
 		configuration.put(OvhPriceImport.CONF_ITYPE, ".*-.*");
 		configuration.put(OvhPriceImport.CONF_ENGINE,
-				"(mongodb|mysql|postgresql|kafka|redis|opensearch|kafkaMirrorMaker)");
+				"(mongodb|mysql|postgresql|kafka|redis|opensearch|kafkaMirrorMaker).*");
 		configuration.put(OvhPriceImport.CONF_FLAVOR, "(db1|db2).*");
 
 		// Install a new configuration

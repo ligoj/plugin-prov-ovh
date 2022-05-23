@@ -37,7 +37,7 @@
     {"region":"GRA7","flavorName":"t1-some","flavorId":"_ERROR_","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
     {"region":"_SOME_","flavorName":"c2-120","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99_SOME","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
     {"region":"GRA7","flavorName":"suse-c2-120","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99-suse","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}},
-    {"region":"SGB5","flavorName":"type/t1/180","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99-typefail","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}}
+    {"region":"SGB5","flavorName":"type/c2/120","flavorId":"8fbec0a1-03cf-47ec-9c59-0dbaa7d40a99-typefail","monthlyPrice":{"value":4899,"currencyCode":"EUR"},"price":{"value":9.399,"currencyCode":"EUR"}}
 ],
 
 "snapshots":[
