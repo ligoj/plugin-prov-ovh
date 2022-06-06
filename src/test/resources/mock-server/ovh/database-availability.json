@@ -34,6 +34,24 @@
         "maxDiskSize": 160,
         "status": "STABLE"
     },{
+        "engine": "mysql",
+        "version": "8",
+        "plan": "business",
+        "default": false,
+        "region": "GRA",
+        "flavor": "db1-no-term-price",
+        "startDate": "2021-10-20",
+        "endOfLife": null,
+        "upstreamEndOfLife": null,
+        "network": "public",
+        "backup": "automatic",
+        "minNodeNumber": 1,
+        "maxNodeNumber": 1,
+        "minDiskSize": 160,
+        "maxDiskSize": 160,
+        "status": "STABLE"
+    },
+    {
         "engine": "postgresql",
         "version": "10",
         "plan": "business",

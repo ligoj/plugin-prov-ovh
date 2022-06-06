@@ -118,7 +118,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	| sed 's/ data-price-type="/,"term":"/' \
 	| sed 's/&quot;/"/g'\
 	| sed 's|\\/|/|g'\
-	| sed 's|  | |g' > database-price.json
+	| sed 's|  | |g'\
+	| sed '1 s|^|[|'\
+	| sed '$ s|,$|]|' > database-price.json
 	</code>
 	 */
 	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
@@ -132,7 +134,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Default pricing URL.
 	 */
-	protected static final String DEFAULT_API_PRICES = "https://da9smdsh48mvy.cloudfront.net/cloud"; // https://ovh.ligoj.io";
+	protected static final String DEFAULT_API_PRICES = "https://da9smdsh48mvy.cloudfront.net/cloud"; // https://ovh.ligoj.io/cloud";
 
 	private static final TypeReference<Map<String, ProvLocation>> MAP_LOCATION = new TypeReference<>() {
 		// Nothing to extend
@@ -168,7 +170,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		nextStep(context, "initialize");
 		context.setValidOs(Pattern.compile(configuration.get(CONF_OS, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setValidDatabaseType(Pattern.compile(configuration.get(CONF_DTYPE, ".*"), Pattern.CASE_INSENSITIVE));
-		context.setValidDatabaseEngine(Pattern.compile(configuration.get(CONF_ENGINE, "(mysql|postgresql)"), Pattern.CASE_INSENSITIVE));
+		context.setValidDatabaseEngine(
+				Pattern.compile(configuration.get(CONF_ENGINE, "(mysql|postgresql)"), Pattern.CASE_INSENSITIVE));
 		context.setValidInstanceType(Pattern.compile(configuration.get(CONF_ITYPE, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setValidRegion(Pattern.compile(configuration.get(CONF_REGIONS, ".*")));
 
@@ -237,16 +240,14 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	// Instal instance prices
 	private void installInstancePrices(final UpdateContext context, final OvhAllPrices prices,
 			final ProvInstancePriceTerm hourlyTerm, ProvInstancePriceTerm monthlyTerm) throws IOException {
-		try (var curl = new CurlProcessor()) {
-			final var flavors = getFlavors().stream().collect(Collectors.toMap(OvhFlavor::getId, Function.identity()));
+		final var flavors = getFlavors().stream().collect(Collectors.toMap(OvhFlavor::getId, Function.identity()));
 
-			// For each price/region/OS/software
-			// Install term, type and price
-			nextStep(context, "install-vm");
-			final var instances = prices.getInstances();
-			instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
-					.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
-		}
+		// For each price/region/OS/software
+		// Install term, type and price
+		nextStep(context, "install-vm");
+		final var instances = prices.getInstances();
+		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
+				.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
 	}
 
 	// Instal database prices
@@ -258,33 +259,27 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
 				.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
 
-		try (var curl = new CurlProcessor()) {
-			final var databasesPrices = getDatabasesPrices();
-			final var databasesAvaibility = getDatabases();
-			final var datbaseCapabilities = getDatabasesCapabilities(); // engines , flavors, plan
-			final var flavorsByName = datbaseCapabilities.getFlavors().stream()
-					.collect(Collectors.toMap(OvhDatabaseFlavor::getName, Function.identity()));
-			final var plansByName = datbaseCapabilities.getPlans().stream()
-					.collect(Collectors.toMap(OvhDatabasePlan::getName, Function.identity()));
-			final var enginesByName = datbaseCapabilities.getEngines().stream()
-					.collect(Collectors.toMap(OvhDatabaseEngine::getName, Function.identity()));
+		final var databasesPrices = getDatabasesPrices();
+		final var databasesAvaibility = getDatabases();
+		final var datbaseCapabilities = getDatabasesCapabilities(); // engines , flavors, plan
+		final var flavorsByName = datbaseCapabilities.getFlavors().stream()
+				.collect(Collectors.toMap(OvhDatabaseFlavor::getName, Function.identity()));
+		final var plansByName = datbaseCapabilities.getPlans().stream()
+				.collect(Collectors.toMap(OvhDatabasePlan::getName, Function.identity()));
+		final var enginesByName = datbaseCapabilities.getEngines().stream()
+				.collect(Collectors.toMap(OvhDatabaseEngine::getName, Function.identity()));
 
-			// Build a prices map cnverting code
-			// from <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>
-			// to <code>$ENGINE-$PLAN-$FLAVOR</code>.
-			final var pricesByCode = databasesPrices.stream()
-					.collect(Collectors.toMap(
-							p -> p.getPlanCode().replace("databases.", "").replace(".hour.consumption", ""),
-							Function.identity()));
-			databasesAvaibility.stream()
-					.filter(c -> isEnabledEngine(context, c.getEngine())
-							&& isEnabledDatabaseType(context, c.getFlavor()) 
-							&& enginesByName.containsKey(c.getEngine())
-							&& flavorsByName.containsKey(c.getFlavor()) 
-							&& plansByName.containsKey(c.getPlan()))
-					.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
-							pricesByCode, c));
-		}
+		// Build a prices map cnverting code
+		// from <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>
+		// to <code>$ENGINE-$PLAN-$FLAVOR</code>.
+		final var pricesByCode = databasesPrices.stream().collect(Collectors.toMap(
+				p -> p.getPlanCode().replace("databases.", "").replace(".hour.consumption", ""), Function.identity()));
+		databasesAvaibility.stream()
+				.filter(c -> isEnabledEngine(context, c.getEngine()) && isEnabledDatabaseType(context, c.getFlavor())
+						&& enginesByName.containsKey(c.getEngine()) && flavorsByName.containsKey(c.getFlavor())
+						&& plansByName.containsKey(c.getPlan()))
+				.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
+						pricesByCode, c));
 	}
 
 	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
@@ -306,13 +301,23 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 					var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c, pricePlan,
 							plansByName.get(c.getPlan()));
 					// Install monthly based price
-					installDatabasePrice(context, monthlyTerm, monthlyTerm.getCode() + "/" + codePricePlan, type,
-							pricePlan.getMonthlyPrice(), engine, null, false, region);
+					installDatabasePrice(context, monthlyTerm, codePricePlan, type, pricePlan.getMonthlyPrice(), engine,
+							null, false, region);
 
 					// Install hourly based price
-					installDatabasePrice(context, hourlyTerm, hourlyTerm.getCode() + "/" + codePricePlan, type,
-							pricePlan.getHourlyPrice(), engine, null, false, region);
+					installDatabasePrice(context, hourlyTerm, codePricePlan, type, pricePlan.getHourlyPrice(), engine,
+							null, false, region);
 				});
+	}
+
+	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
+			final String codePricePlan, final ProvDatabaseType type, final Double costPeriod, final String engine,
+			final String storageEngine, final boolean byol, final ProvLocation region) {
+		if (costPeriod != null) {
+			// Price is available for this term
+			installDatabasePrice(context, term, term.getCode() + "/" + codePricePlan, type, (double) costPeriod, engine,
+					null, false, region);
+		}
 	}
 
 	private void installSupportTypes(final UpdateContext context) throws IOException {
@@ -653,10 +658,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setAutoScale(false);
 			t.setDescription(String.format(
 					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
-							+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"term\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
+							+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
 					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
 					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(), aType.getStorage(),
-					databasePrice.getTerm(), plan.getBackupRetention(), plan.getDescription()));
+					plan.getBackupRetention(), plan.getDescription()));
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);
