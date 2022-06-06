@@ -250,9 +250,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// Check the database
 		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
 		Assertions.assertNull(lookupB.getPrice().getEdition());
-		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", lookupB.getPrice().getCode());
-		Assertions.assertEquals(15360.0, lookupB.getPrice().getType().getRam());// 1024
-		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());// 1
+		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", lookupB.getPrice().getCode());
+		Assertions.assertEquals(15360.0, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());
 		Assertions.assertNull(lookupB.getPrice().getStorageEngine());
 
 	}
@@ -524,8 +524,20 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).build());
 		var dPrice = dLookup.getPrice();
-		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
+		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", dPrice.getCode());
 		var dType = dPrice.getType();
+		Assertions.assertEquals("essential/db1-15", dType.getCode());
+		Assertions.assertEquals("essential/db1-15", dType.getName());
+		Assertions.assertEquals("gra7", dPrice.getLocation().getName());
+		Assertions.assertEquals("Gravelines", dPrice.getLocation().getDescription());
+
+		// Lookup Database in an available region with partial usage (dev)
+		// ---------------------------------
+		dLookup = qbResource.lookup(subscription,
+				QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).usage("dev").build());
+		dPrice = dLookup.getPrice();
+		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
+		dType = dPrice.getType();
 		Assertions.assertEquals("essential/db1-15", dType.getCode());
 		Assertions.assertEquals("essential/db1-15", dType.getName());
 		Assertions.assertEquals("gra7", dPrice.getLocation().getName());

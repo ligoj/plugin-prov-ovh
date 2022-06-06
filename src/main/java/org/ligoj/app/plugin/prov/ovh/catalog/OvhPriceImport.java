@@ -300,23 +300,23 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 					}
 					var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c, pricePlan,
 							plansByName.get(c.getPlan()));
-					// Install monthly based price
-					installDatabasePrice(context, monthlyTerm, codePricePlan, type, pricePlan.getMonthlyPrice(), engine,
-							null, false, region);
 
 					// Install hourly based price
-					installDatabasePrice(context, hourlyTerm, codePricePlan, type, pricePlan.getHourlyPrice(), engine,
-							null, false, region);
+					installDatabasePrice(context, hourlyTerm, codePricePlan, type, pricePlan.getHourlyCost(),
+							context.getHoursMonth(), engine, region);
+					// Install monthly based price
+					installDatabasePrice(context, monthlyTerm, codePricePlan, type, pricePlan.getMonthlyCost(), 1,
+							engine, region);
 				});
 	}
 
 	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
-			final String codePricePlan, final ProvDatabaseType type, final Double costPeriod, final String engine,
-			final String storageEngine, final boolean byol, final ProvLocation region) {
+			final String codePricePlan, final ProvDatabaseType type, final Double costPeriod, double proRata,
+			final String engine, final ProvLocation region) {
 		if (costPeriod != null) {
 			// Price is available for this term
-			installDatabasePrice(context, term, term.getCode() + "/" + codePricePlan, type, (double) costPeriod, engine,
-					null, false, region);
+			installDatabasePrice(context, term, term.getCode() + "/" + codePricePlan, type, costPeriod * proRata,
+					engine, region);
 		}
 	}
 
@@ -425,8 +425,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 		final var region = installRegion(context, instance.getRegion().toLowerCase());
 		final var type = installInstanceType(context, flavor.getName(), flavor);
-		installInstancePrice(context, hourlyTerm, os, type, instance.getPriceValue() * context.getHoursMonth(), region);
-		installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyPriceValue(), region);
+		installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyCost() * context.getHoursMonth(), region);
+		installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyCost(), region);
 	}
 
 	@Override
@@ -676,7 +676,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
 			final String localCode, final ProvDatabaseType type, final double monthlyCost, final String engine,
-			final String storageEngine, final boolean byol, final ProvLocation region) {
+			final ProvLocation region) {
 		final var price = context.getPreviousDatabase().computeIfAbsent(region.getName() + "/" + localCode, c -> {
 			// New instance price
 			final var newPrice = new ProvDatabasePrice();
@@ -687,8 +687,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		copyAsNeeded(context, price, p -> {
 			p.setLocation(region);
 			p.setEngine(engine.toUpperCase(Locale.ENGLISH));
-			p.setStorageEngine(storageEngine);
-			p.setLicense(null /* ProvInstancePrice.LICENSE_BYOL */);
 			p.setTerm(term);
 			p.setType(type);
 			p.setPeriod(term.getPeriod());
