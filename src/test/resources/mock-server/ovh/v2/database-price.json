@@ -1,10 +1,10 @@
 [
     {"@see": "org.ligoj.app.plugin.prov.ovh.catalog.OvhDatabasePrice", 
-    "all": {"monthly": "$23.82","hourly": "$0.0414"},"term": "hourly","planCode": "databases.mongodb-essential-db1-2.hour.consumption","regions": "all"},
-    {"all": {"monthly": "$92.26","hourly":"$0.2253"},"term":"hourly","planCode":"databases.mongodb-business-db1-7.hour.consumption","regions":"all"},
-    {"all": {"monthly": "$649.66","hourly": "$0.9905"},"term": "hourly","planCode": "databases.mongodb-enterprise-db1-15.hour.consumption","regions": "all"},
-    {"all": {"monthly":"$218.84 /month/node","hourly":"$0.3991 /hour/node"},"term":"hourly","planCode":"databases.mysql-essential-db1-15.hour.consumption","regions":"all"},
-	{"all": {"monthly":"$279.69 /month/node","hourly":"$0.4826 /hour/node"},"term":"hourly","planCode":"databases.postgresql-business-db1-15.hour.consumption","regions":"all"},
-    {"all": {"monthly": "$2,637.02","hourly": "$4.6185" }, "term": "hourly","planCode": "databases.mongodb-enterprise-db1-60.hour.consumption","regions": "all"},
-    {"all": {"monthly": "$1,119.42","hourly": "$2.5353"},"term": "hourly","planCode": "databases.mysql-business-db1-60.hour.consumption","regions": "all"}
+    "all": {"monthly": "$23.82","hourly": "$0.0414"},"planCode": "databases.mongodb-essential-db1-2.hour.consumption","regions": "all"},
+    {"all": {"monthly": "$92.26","hourly":"$0.2253"},"planCode":"databases.mongodb-business-db1-7.hour.consumption","regions":"all"},
+    {"all": {"monthly": "$649.66","hourly": "$0.9905"},"planCode": "databases.mongodb-enterprise-db1-15.hour.consumption","regions": "all"},
+    {"all": {"monthly":"$218.84 /month/node","hourly":"$0.3991 /hour/node"},"planCode":"databases.mysql-essential-db1-15.hour.consumption","regions":"all"},
+	{"all": {"monthly":"$279.69 /month/node","hourly":"$0.4826 /hour/node"},"planCode":"databases.postgresql-business-db1-15.hour.consumption","regions":"all"},
+    {"all": {"monthly": "$2,637.02","hourly": "$4.6185" }, "planCode": "databases.mongodb-enterprise-db1-60.hour.consumption","regions": "all"},
+    {"all": {"monthly": "$1,119.42","hourly": "$2.5353"},"planCode": "databases.mysql-business-db1-60.hour.consumption","regions": "all"}
 ]

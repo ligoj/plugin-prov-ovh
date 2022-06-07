@@ -199,7 +199,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("Gravelines", lookup.getPrice().getLocation().getDescription());
 		checkImportStatus();
 
-		// Check physical CPU
 		// CPU Intensive
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(4096).constant(true).build());
@@ -251,9 +250,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// Check the database
 		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
 		Assertions.assertNull(lookupB.getPrice().getEdition());
-		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", lookupB.getPrice().getCode());
-		Assertions.assertEquals(15360.0, lookupB.getPrice().getType().getRam());// 1024
-		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());// 1
+		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", lookupB.getPrice().getCode());
+		Assertions.assertEquals(15360.0, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());
 		Assertions.assertNull(lookupB.getPrice().getStorageEngine());
 
 	}
@@ -338,9 +337,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0.0, term.getPeriod());// 1
 		Assertions.assertEquals("c2-120", price.getType().getCode());
 		Assertions.assertEquals("c2-120", price.getType().getName());
-		Assertions.assertEquals("{Disk: 400, Network: 10000/10000}", price.getType().getDescription());// {Disk: 25,
-																										// Category:
-																										// Standard}
+		Assertions.assertEquals("{Disk: 400, Network: 10000/10000}", price.getType().getDescription());
 		Assertions.assertNull(price.getType().getProcessor());
 		Assertions.assertFalse(price.getType().isAutoScale());
 
@@ -527,8 +524,20 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).build());
 		var dPrice = dLookup.getPrice();
-		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
+		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", dPrice.getCode());
 		var dType = dPrice.getType();
+		Assertions.assertEquals("essential/db1-15", dType.getCode());
+		Assertions.assertEquals("essential/db1-15", dType.getName());
+		Assertions.assertEquals("gra7", dPrice.getLocation().getName());
+		Assertions.assertEquals("Gravelines", dPrice.getLocation().getDescription());
+
+		// Lookup Database in an available region with partial usage (dev)
+		// ---------------------------------
+		dLookup = qbResource.lookup(subscription,
+				QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).usage("dev").build());
+		dPrice = dLookup.getPrice();
+		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
+		dType = dPrice.getType();
 		Assertions.assertEquals("essential/db1-15", dType.getCode());
 		Assertions.assertEquals("essential/db1-15", dType.getName());
 		Assertions.assertEquals("gra7", dPrice.getLocation().getName());

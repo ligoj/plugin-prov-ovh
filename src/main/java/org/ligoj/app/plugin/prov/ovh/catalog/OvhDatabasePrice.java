@@ -33,20 +33,13 @@ public class OvhDatabasePrice {
 	 * Monthly price,
 	 */
 	@Getter
-	private Double monthlyPrice;
+	private Double monthlyCost;
 
 	/**
 	 * Hourly price.
 	 */
 	@Getter
-	private Double hourlyPrice;
-
-	/**
-	 * Term code code corresponding to the commitment.
-	 */
-	@Getter
-	@Setter
-	private String term;
+	private Double hourlyCost;
 
 	/**
 	 * Plan's code built like this : <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>.
@@ -56,10 +49,14 @@ public class OvhDatabasePrice {
 	private String planCode;
 
 	@JsonProperty("all")
-	private void getMonthlyPrice(Map<String, Object> allPrice) {
+	private void setMonthlyPrice(Map<String, Object> allPrice) {
 		final var monthlyPrice = (String) allPrice.get("monthly");
-		this.monthlyPrice = Double.parseDouble(monthlyPrice.replaceAll("[^0-9.]", "").trim());
-		final var hourlyPrice = (String) allPrice.get("monthly");
-		this.hourlyPrice = Double.parseDouble(hourlyPrice.replaceAll("[^0-9.]", "").trim());
+		if (monthlyPrice != null) {
+			this.monthlyCost = Double.parseDouble(monthlyPrice.replaceAll("[^0-9.]", "").trim());
+		}
+		final var hourlyPrice = (String) allPrice.get("hourly");
+		if (hourlyPrice != null) {
+			this.hourlyCost = Double.parseDouble(hourlyPrice.replaceAll("[^0-9.]", "").trim());
+		}
 	}
 }

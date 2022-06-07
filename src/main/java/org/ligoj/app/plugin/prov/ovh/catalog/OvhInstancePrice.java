@@ -15,10 +15,10 @@ import lombok.Setter;
 public class OvhInstancePrice {
 
 	@Getter
-	private double monthlyPriceValue;
+	private double monthlyCost;
 
 	@Getter
-	private double priceValue;
+	private double hourlyCost;
 
 	@Getter
 	@Setter
@@ -29,13 +29,13 @@ public class OvhInstancePrice {
 	private String flavorId;
 
 	@JsonProperty("monthlyPrice")
-	private void getMonthlyPrice(final Map<String, Object> monthlyPrice) {
-		this.monthlyPriceValue = ((Number) monthlyPrice.get("value")).doubleValue();
+	private void setMonthlyCostFromJson(final Map<String, Object> monthlyPrice) {
+		this.monthlyCost = ((Number) monthlyPrice.get("value")).doubleValue();
 	}
 
 	@JsonProperty("price")
-	private void getPrice(final Map<String, Object> price) {
-		this.priceValue = (double) price.get("value");
+	private void setHourlyCostFromJson(final Map<String, Object> price) {
+		this.hourlyCost = (double) price.get("value");
 	}
 
 }

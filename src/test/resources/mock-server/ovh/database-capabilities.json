@@ -144,7 +144,14 @@
             "core": 32,
             "memory": 120,
             "storage": 800
+        },
+        {
+            "name": "db1-no-term-price",
+            "core": 2,
+            "memory": 7,
+            "storage": 50
         }
+        
     ],
     "options": [
         {
