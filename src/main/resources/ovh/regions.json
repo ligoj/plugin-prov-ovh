@@ -11,15 +11,15 @@
     "longitude": -73.9638
   },
   "de": {
-    "name": "Frankford",
-    "continentM49": 19,
-    "regionM49": 21,
-    "countryM49": 840,
-    "countryA2": "US",
-    "placement": "east",
-    "subRegion": "Philadelphie",
-    "latitude": 40.0149,
-    "longitude": -75.0967
+    "name": "Franckfurt",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 276,
+    "countryA2": "DE",
+    "placement": "west",
+    "subRegion": "Hesse",
+    "latitude": 50.1109221,
+    "longitude": 8.6821267
   },
   "gra": {
     "name": "Gravelines",
@@ -30,16 +30,16 @@
     "placement": "north",
     "subRegion": "Hauts-de-France",
     "latitude": 51.0028,
-    "longitude": 2.1077
+    "longitude": 2.1077 
   },
-  "sgb": {
+  "sbg": {
     "name": "Strasbourg",
     "continentM49": 150,
     "regionM49": 155,
     "countryM49": 250,
     "countryA2": "FR",
     "placement": "north",
-    "subRegion": " Alsace-Champagne-Ardenne-Lorraine",
+    "subRegion": "Alsace-Champagne-Ardenne-Lorraine",
     "latitude": 48.5690,
     "longitude": 7.691
   },
@@ -47,7 +47,7 @@
     "name": "Singapour",
     "continentM49": 142,
     "regionM49": 35,
-    "countryM49": 458,
+    "countryM49": 702,
     "countryA2": "SG",
     "placement": "south",
     "latitude": 1.3139,
@@ -65,25 +65,25 @@
     "longitude": 150.3701
   },
   "uk": {
-    "name": "London",
+    "name": "Erith",
     "continentM49": 150,
     "regionM49": 154,
     "countryM49": 826,
     "countryA2": "GB",
-    "placement": "south",
-    "subRegion": "London",
-    "latitude": 51.5283,
-    "longitude": -0.3824
+    "placement": "east",
+    "subRegion": "Londre",
+    "latitude": 51.480818,
+    "longitude": 0.174675
   },
   "waw": {
-    "name": "Varsovie",
+    "name": "Warsaw",
     "continentM49": 150,
     "regionM49": 151,
     "countryM49": 616,
     "countryA2": "PL",
-    "placement": "east",
+    "placement": "west",
     "subRegion": "Varsovie",
-    "latitude": 52.2326,
-    "longitude": 20.7803
+    "latitude": 52.237049,
+    "longitude": 21.017532
   }
 }
