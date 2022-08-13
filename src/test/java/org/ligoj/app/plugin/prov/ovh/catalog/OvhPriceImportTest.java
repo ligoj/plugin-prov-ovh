@@ -186,7 +186,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				builder().cpu(7).ram(1741).constant(true).usage("36month").build());
+				builder().cpu(7).ram(1741).usage("36month").build());
 		Assertions.assertEquals(4899.0d, lookup.getCost(), DELTA);// 2240d
 		Assertions.assertEquals(4899.0d, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals(4899.0d, lookup.getPrice().getCostPeriod(), DELTA);
@@ -201,12 +201,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 		// CPU Intensive
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				builder().cpu(2).ram(4096).constant(true).build());
+				builder().cpu(2).ram(4096).build());
 		Assertions.assertEquals("gra7/monthly.postpaid/c2-120", lookup.getPrice().getCode());
 
 		// General Purpose
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				builder().cpu(2).ram(8000).constant(true).build());
+				builder().cpu(2).ram(8000).build());
 		Assertions.assertEquals("gra7/monthly.postpaid/c2-120", lookup.getPrice().getCode());
 
 		// Install again to check the update without change
@@ -414,12 +414,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0, provResource.getConfiguration(subscription).getCost().getMin(), DELTA); // 0
 
 		var lookup = qiResource.lookup(subscription,
-				builder().cpu(2).ram(15000).constant(true).os(VmOs.WINDOWS).location("sbg5").usage("36month").build());
+				builder().cpu(2).ram(15000).os(VmOs.WINDOWS).location("sbg5").usage("36month").build());
 		Assertions.assertEquals("sbg5/monthly.postpaid/win-r2-15", lookup.getPrice().getCode());
 
 		// Request an instance for a generic Linux OS
 		lookup = qiResource.lookup(subscription,
-				builder().constant(true).type("c2-120").os(VmOs.LINUX).location("gra7").usage("dev").build());
+				builder().type("c2-120").os(VmOs.LINUX).location("gra7").usage("dev").build());
 		Assertions.assertEquals("gra7/consumption/c2-120", lookup.getPrice().getCode());
 
 		// New instance for "s-1vcpu-1gb"

@@ -7,13 +7,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -97,18 +95,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	public static final String CONF_FLAVOR = ProvOvhPluginResource.KEY + ":flavor";
 
-	/**
-	 * Path to root bulk price index.
-	 */
-	public static final String OVH_PRICES_PATH = "/price.json"; // Public: "/cloud/price"
-
-	public static final String OVH_REGIONS_PATH = "/region.json"; // Public: "/cloud/project/%s/region"
-
-	public static final String OVH_FLAVORS_PATH = "/flavor.json"; // Public: "/cloud/project/%s/flavor"
 
 	/**
 	 * <code>
-	 * curl -s https://www.ovhcloud.com/en/public-cloud/prices/ | \
+	 * (curl -s https://www.ovhcloud.com/en/public-cloud/prices/; curl -s https://us.ovhcloud.com/public-cloud/prices/) | \
 	grep "data-price"  \
 	| sed 's/^.*<tr data-price="//g' \
 	| sed 's|}"||g' \
@@ -118,12 +108,18 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	| sed 's/ data-price-type="/,"term":"/' \
 	| sed 's/&quot;/"/g'\
 	| sed 's|\\/|/|g'\
+	| sed 's|/month||g'\
+	| sed 's|/hour||g'\
+	| sed 's|/GB||g'\
+	| sed 's|/node||g'\
+	| sed 's|\$||g'\
 	| sed 's|  | |g'\
+	| sed 's| "|"|g'\
 	| sed '1 s|^|[|'\
-	| sed '$ s|,$|]|' > database-price.json
+	| sed '$ s|,$|]|' > price.json
 	</code>
 	 */
-	public static final String OVH_PRICES_DATABASE_PATH = "/database-price.json";
+	public static final String OVH_PRICES_PATH = "/price.json";
 
 	public static final String OVH_AVAIBILITY_DATABASE_PATH = "/database-availability.json"; // Public:
 																								// "/cloud/project/%s/database/availability"
@@ -178,8 +174,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		// Add all regional DC
 		final var regionData = toMap("ovh/regions.json", MAP_LOCATION);
 		context.getMapRegionById().putAll(regionData);
-		regionData.forEach((k, v) -> IntStream.range(1, 16).forEach(i -> context.getMapRegionById().put(k + i, v)));
-
 		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, node).stream()
 				.collect(Collectors.toMap(ProvInstanceType::getCode, Function.identity())));
 		context.setDatabaseTypes(dtRepository.findAllBy(BY_NODE, node).stream()
@@ -208,10 +202,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		var monthlyTerm = installPriceTerm(context, "monthly.postpaid", 1);
 		final var prices = getPrices();
 
-		installInstancePrices(context, prices, hourlyTerm, monthlyTerm);
-		installDatabasePrices(context, hourlyTerm, monthlyTerm);
-		installStoragePrices(context, prices);
-		installSupportPrices(context);
+//		installInstancePrices(context, prices, hourlyTerm, monthlyTerm);
+//		installDatabasePrices(context, hourlyTerm, monthlyTerm);
+//		installStoragePrices(context, prices);
+//		installSupportPrices(context);
 	}
 
 	private void installSupportPrices(final UpdateContext context) throws IOException {
@@ -240,14 +234,14 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	// Instal instance prices
 	private void installInstancePrices(final UpdateContext context, final OvhAllPrices prices,
 			final ProvInstancePriceTerm hourlyTerm, ProvInstancePriceTerm monthlyTerm) throws IOException {
-		final var flavors = getFlavors().stream().collect(Collectors.toMap(OvhFlavor::getId, Function.identity()));
-
-		// For each price/region/OS/software
-		// Install term, type and price
-		nextStep(context, "install-vm");
-		final var instances = prices.getInstances();
-		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
-				.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
+//		final var flavors = getFlavors().stream().collect(Collectors.toMap(OvhFlavor::getId, Function.identity()));
+//
+//		// For each price/region/OS/software
+//		// Install term, type and price
+//		nextStep(context, "install-vm");
+//		final var instances = prices.getInstances();
+//		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
+//				.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
 	}
 
 	// Instal database prices
@@ -259,27 +253,17 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
 				.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
 
-		final var databasesPrices = getDatabasesPrices();
-		final var databasesAvaibility = getDatabases();
-		final var datbaseCapabilities = getDatabasesCapabilities(); // engines , flavors, plan
-		final var flavorsByName = datbaseCapabilities.getFlavors().stream()
-				.collect(Collectors.toMap(OvhDatabaseFlavor::getName, Function.identity()));
-		final var plansByName = datbaseCapabilities.getPlans().stream()
-				.collect(Collectors.toMap(OvhDatabasePlan::getName, Function.identity()));
-		final var enginesByName = datbaseCapabilities.getEngines().stream()
-				.collect(Collectors.toMap(OvhDatabaseEngine::getName, Function.identity()));
-
 		// Build a prices map cnverting code
 		// from <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>
 		// to <code>$ENGINE-$PLAN-$FLAVOR</code>.
-		final var pricesByCode = databasesPrices.stream().collect(Collectors.toMap(
-				p -> p.getPlanCode().replace("databases.", "").replace(".hour.consumption", ""), Function.identity()));
-		databasesAvaibility.stream()
-				.filter(c -> isEnabledEngine(context, c.getEngine()) && isEnabledDatabaseType(context, c.getFlavor())
-						&& enginesByName.containsKey(c.getEngine()) && flavorsByName.containsKey(c.getFlavor())
-						&& plansByName.containsKey(c.getPlan()))
-				.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
-						pricesByCode, c));
+//		final var pricesByCode = databasesPrices.stream().collect(Collectors.toMap(
+//				p -> p.getPlanCode().replace("databases.", "").replace(".hour.consumption", ""), Function.identity()));
+//		databasesAvaibility.stream()
+//				.filter(c -> isEnabledEngine(context, c.getEngine()) && isEnabledDatabaseType(context, c.getFlavor())
+//						&& enginesByName.containsKey(c.getEngine()) && flavorsByName.containsKey(c.getFlavor())
+//						&& plansByName.containsKey(c.getPlan()))
+//				.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
+//						pricesByCode, c));
 	}
 
 	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
@@ -288,9 +272,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			final OvhDatabaseAvaibility c) {
 		final var engine = c.getEngine();
 		final var regionGroup = c.getRegion().toLowerCase();
-		context.getRegions().entrySet().stream().filter(r -> r.getKey().toLowerCase().startsWith(regionGroup))
-				.map(Entry::getValue).distinct().forEach(region -> {
-
+		context.getUsedRegions().stream().filter(r -> r.toLowerCase().startsWith(regionGroup))
+				.filter(r -> !r.toLowerCase().equals(regionGroup)).forEach(regionName -> {
+					final var region = context.getRegions().get(regionName);
 					final var codeType = "%s/%s".formatted(c.getPlan(), c.getFlavor());
 					final var codePricePlan = "%s-%s-%s".formatted(c.getEngine(), c.getPlan(), c.getFlavor());
 					final var pricePlan = pricesByCode.get(codePricePlan);
@@ -358,22 +342,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES) + String.format(templatePath, service);
 	}
 
-	private String getFlavorsUrl() {
-		return getApiPriceUrl("-public-", OVH_FLAVORS_PATH);
-	}
-
-	private String getDatabaseAvaibilityUrl() {
-		return getApiPriceUrl("-public-", OVH_AVAIBILITY_DATABASE_PATH);
-	}
-
-	private String getDatabaseCapabilitiesyUrl() {
-		return getApiPriceUrl("-public-", OVH_CAPABILITIES_DATABASE_PATH);
-	}
-
-	private String getPricesDatabaseUrl() {
-		return getApiPriceUrl("-public-", OVH_PRICES_DATABASE_PATH);
-	}
-
 	private String getPricesUrl() {
 		return getApiPriceUrl("-public-", OVH_PRICES_PATH);
 	}
@@ -389,24 +357,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		}
 	}
 
-	private List<OvhDatabaseAvaibility> getDatabases() throws IOException {
-		return getResource(this::getDatabaseAvaibilityUrl, null, DATABASE_AVAIBILITY_LIST);
-	}
-
-	private OvhDatabaseCapabilities getDatabasesCapabilities() throws IOException {
-		return getResource(this::getDatabaseCapabilitiesyUrl, null, DATABASE_CAPABILITIES);
-	}
-
-	private List<OvhDatabasePrice> getDatabasesPrices() throws IOException {
-		return getResource(this::getPricesDatabaseUrl, null, DATABASE_LIST);
-	}
-
-	private OvhAllPrices getPrices() throws IOException {
-		return getResource(this::getPricesUrl, OvhAllPrices.class, null);
-	}
-
-	private List<OvhFlavor> getFlavors() throws IOException {
-		return getResource(this::getFlavorsUrl, null, FLAVOR_LIST);
+	private List<OvhDatabasePrice> getPrices() throws IOException {
+		return getResource(this::getPricesUrl, null, DATABASE_LIST);
 	}
 
 	private void installInstancePrice(final UpdateContext context, final OvhInstancePrice instance,
@@ -424,6 +376,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		}
 
 		final var region = installRegion(context, instance.getRegion().toLowerCase());
+
+		// Mark this region as used
+		context.getUsedRegions().add(instance.getRegion().toLowerCase());
+
 		final var type = installInstanceType(context, flavor.getName(), flavor);
 		installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyCost() * context.getHoursMonth(), region);
 		installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyCost(), region);
@@ -601,7 +557,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setRam((int) Math.ceil(aType.getRam() / 1000 * 1024)); // Convert in MiB
 			t.setDescription("{Disk: " + aType.getDisk() + ", Network: " + aType.getInboundBandwidth() + "/"
 					+ aType.getOutboundBandwidth() + "}");
-			t.setConstant(true);
 			t.setAutoScale(false);
 
 			// Rating
@@ -654,7 +609,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setName(code);
 			t.setCpu(aType.getCore());
 			t.setRam(aType.getMemory() * 1024.0); // Convert to MiB
-			t.setConstant(true);
 			t.setAutoScale(false);
 			t.setDescription(String.format(
 					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
