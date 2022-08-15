@@ -159,9 +159,8 @@ class OvhPriceImportTest extends AbstractServerTest {
 		this.resource.getImportCatalogResource().endTask("service:prov:ovh", false);
 		this.resource.getImportCatalogResource().startTask("service:prov:ovh", t -> {
 			t.setLocation(null);
-			t.setNbInstancePrices(null);
-			t.setNbInstanceTypes(null);
-			t.setNbStorageTypes(null);
+			t.setNbPrices(0);
+			t.setNbTypes(0);
 			t.setWorkload(0);
 			t.setDone(0);
 			t.setPhase(null);
@@ -263,10 +262,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(6, status.getWorkload());
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 18);
-		Assertions.assertTrue(status.getNbInstanceTypes().intValue() >= 9);
+		Assertions.assertTrue(status.getNbPrices().intValue() >= 18);
+		Assertions.assertTrue(status.getNbTypes().intValue() >= 9);
 		Assertions.assertTrue(status.getNbLocations() >= 1);
-		Assertions.assertTrue(status.getNbStorageTypes().intValue() >= 3);
 	}
 
 	private void mockServer() throws IOException {
