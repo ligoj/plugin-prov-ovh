@@ -181,38 +181,37 @@ class OvhPriceImportTest extends AbstractServerTest {
 		final var quote = install();
 
 		// Check the whole quote
-		final var instance = check(quote, 6867.07d, 13732.84d, 6861.27d); // 6865.27d 13730.54d
-
+		final var instance = check(quote, 1302.0d, 2602.6d, 1299.4d);
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(7).ram(1741).usage("36month").build());
-		Assertions.assertEquals(4899.0d, lookup.getCost(), DELTA);// 2240d
-		Assertions.assertEquals(4899.0d, lookup.getPrice().getCost(), DELTA);
-		Assertions.assertEquals(4899.0d, lookup.getPrice().getCostPeriod(), DELTA);
+		Assertions.assertEquals(112d, lookup.getCost(), DELTA);
+		Assertions.assertEquals(112d, lookup.getPrice().getCost(), DELTA);
+		Assertions.assertEquals(112d, lookup.getPrice().getCostPeriod(), DELTA);
 		Assertions.assertEquals("monthly.postpaid", lookup.getPrice().getTerm().getCode());// monthly
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals(1.0, lookup.getPrice().getPeriod(), DELTA);
-		Assertions.assertEquals("gra7/monthly.postpaid/c2-120", lookup.getPrice().getCode());
-		Assertions.assertEquals("c2-120", lookup.getPrice().getType().getCode());
-		Assertions.assertEquals("gra7", lookup.getPrice().getLocation().getName());
+		Assertions.assertEquals("LINUX/gra/monthly.postpaid/b2-30", lookup.getPrice().getCode());
+		Assertions.assertEquals("b2-30", lookup.getPrice().getType().getCode());
+		Assertions.assertEquals("gra", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("Gravelines", lookup.getPrice().getLocation().getDescription());
 		checkImportStatus();
 
 		// CPU Intensive
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(4096).build());
-		Assertions.assertEquals("gra7/monthly.postpaid/c2-120", lookup.getPrice().getCode());
+		Assertions.assertEquals("LINUX/gra/monthly.postpaid/d2-4", lookup.getPrice().getCode());
 
 		// General Purpose
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(8000).build());
-		Assertions.assertEquals("gra7/monthly.postpaid/c2-120", lookup.getPrice().getCode());
+		Assertions.assertEquals("LINUX/gra/monthly.postpaid/d2-8", lookup.getPrice().getCode());
 
 		// Install again to check the update without change
 		resetImportTask();
 		resource.install(false);
 		provResource.updateCost(subscription);
-		check(provResource.getConfiguration(subscription), 6867.07d, 13732.84d, 6861.27d);
+		check(provResource.getConfiguration(subscription),1302.0d, 2602.6d, 1299.4d);
 		checkImportStatus();
 
 		// Now, change a price within the remote catalog
@@ -227,44 +226,44 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 		// Check the new price
 		final var newQuote = provResource.getConfiguration(subscription);
-		Assertions.assertEquals(1187.21d, newQuote.getCost().getMin(), DELTA);
+		Assertions.assertEquals(1302.0d, newQuote.getCost().getMin(), DELTA);
 
 		// Compute price is updated
 		final var instance2 = newQuote.getInstances().get(0);
-		Assertions.assertEquals(1180.41d, instance2.getCost(), DELTA);
+		Assertions.assertEquals(1299.4d, instance2.getCost(), DELTA);
 
 		// Check status
 		checkImportStatus();
 
 		// Check the support
-		Assertions.assertEquals(1, qs2Resource
-				.lookup(subscription, 0, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
-				.size());
+		//Assertions.assertEquals(1, qs2Resource
+		//		.lookup(subscription, 0, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
+		//		.size());
 
-		final var lookupSu = qs2Resource
-				.lookup(subscription, 0, null, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST).get(0);
-		Assertions.assertEquals("Enterprise", lookupSu.getPrice().getType().getName());
-		Assertions.assertEquals(5850.0d, lookupSu.getCost(), DELTA);
+		//final var lookupSu = qs2Resource
+		//		.lookup(subscription, 0, null, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST).get(0);
+		//Assertions.assertEquals("Enterprise", lookupSu.getPrice().getType().getName());
+		//Assertions.assertEquals(5850.0d, lookupSu.getCost(), DELTA);
 
 		// Check the database
 		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
 		Assertions.assertNull(lookupB.getPrice().getEdition());
-		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", lookupB.getPrice().getCode());
-		Assertions.assertEquals(15360.0, lookupB.getPrice().getType().getRam());
-		Assertions.assertEquals(4.0, lookupB.getPrice().getType().getCpu());
+		Assertions.assertEquals("gra/monthly.postpaid/mysql-essential-db1-4", lookupB.getPrice().getCode());
+		Assertions.assertEquals(4096.0, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(2.0, lookupB.getPrice().getType().getCpu());
 		Assertions.assertNull(lookupB.getPrice().getStorageEngine());
 
 	}
 
 	private void checkImportStatus() {
 		final var status = this.resource.getImportCatalogResource().getTask("service:prov:ovh");
-		Assertions.assertEquals(7, status.getDone());
+		Assertions.assertEquals(5, status.getDone());//7
 		Assertions.assertEquals(6, status.getWorkload());
-		Assertions.assertEquals("support", status.getPhase());
+		Assertions.assertEquals("install-vm-storage", status.getPhase());//support
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertTrue(status.getNbPrices().intValue() >= 18);
-		Assertions.assertTrue(status.getNbTypes().intValue() >= 9);
-		Assertions.assertTrue(status.getNbLocations() >= 1);
+		Assertions.assertTrue(status.getNbPrices().intValue() >= 18);//18
+		Assertions.assertTrue(status.getNbTypes().intValue() >= 9);//9
+		Assertions.assertTrue(status.getNbLocations() >= 1);//1
 	}
 
 	private void mockServer() throws IOException {
@@ -325,17 +324,17 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0, price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
-		Assertions.assertEquals(6861.27d, price.getCost(), DELTA);// 5d
-		Assertions.assertEquals(6861.27d, price.getCostPeriod(), DELTA);// 5d
-		Assertions.assertEquals(0.0, price.getPeriod(), DELTA);// 1
+		Assertions.assertEquals(1299.4d, price.getCost(), DELTA);
+		Assertions.assertEquals(1299.4d, price.getCostPeriod(), DELTA);
+		Assertions.assertEquals(0.0, price.getPeriod(), DELTA);
 		final var term = price.getTerm();
-		Assertions.assertEquals("consumption", term.getCode());// monthly
-		Assertions.assertEquals("consumption", term.getName());// monthly
+		Assertions.assertEquals("consumption", term.getCode());
+		Assertions.assertEquals("consumption", term.getName());
 		Assertions.assertFalse(term.isEphemeral());
 		Assertions.assertEquals(0.0, term.getPeriod());// 1
 		Assertions.assertEquals("c2-120", price.getType().getCode());
 		Assertions.assertEquals("c2-120", price.getType().getName());
-		Assertions.assertEquals("{Disk: 400, Network: 10000/10000}", price.getType().getDescription());
+		Assertions.assertEquals("{Disk: 400 GB SSD}", price.getType().getDescription());
 		Assertions.assertNull(price.getType().getProcessor());
 		Assertions.assertFalse(price.getType().isAutoScale());
 
@@ -344,13 +343,13 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 	private ProvQuoteStorage checkStorage(final List<ProvQuoteStorage> storages) {
 		var volume = storages.get(0);
-		Assertions.assertEquals(4.5d, volume.getCost(), DELTA);
+		Assertions.assertEquals(1.2d, volume.getCost(), DELTA);
 		Assertions.assertEquals(100, volume.getSize(), DELTA);
 		Assertions.assertNotNull(volume.getQuoteInstance());
 		final var typeV = volume.getPrice().getType();
-		Assertions.assertEquals("volume.classic", typeV.getCode());
-		Assertions.assertEquals("Classic", typeV.getName());
-		Assertions.assertEquals(250, typeV.getIops());
+		Assertions.assertEquals("volume", typeV.getCode());
+		Assertions.assertEquals("volume", typeV.getName());
+		Assertions.assertEquals(7500, typeV.getIops());
 		Assertions.assertEquals(300, typeV.getThroughput());
 		Assertions.assertEquals(0d, volume.getPrice().getCostTransaction(), DELTA);
 		Assertions.assertEquals(1, typeV.getMinimal());
@@ -359,9 +358,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(ProvStorageOptimized.IOPS, typeV.getOptimized());
 
 		var storage = storages.get(1);
-		Assertions.assertEquals(1.1d, storage.getCost(), DELTA);
+		Assertions.assertEquals(1.2d, storage.getCost(), DELTA);
 		Assertions.assertEquals(100, storage.getSize(), DELTA);
-		// Assertions.assertNotNull(storage.getQuoteInstance());
+		Assertions.assertNotNull(storage.getQuoteInstance());
 		final var typeS = storage.getPrice().getType();
 		Assertions.assertEquals("storage", typeS.getCode());
 		Assertions.assertEquals("Object Storage", typeS.getName());
@@ -369,7 +368,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(200, typeS.getThroughput());
 		Assertions.assertEquals(0d, storage.getPrice().getCostTransaction(), DELTA);
 		Assertions.assertEquals(1d, typeS.getMinimal());
-		// Assertions.assertEquals(4096, typeS.getMaximal().intValue());
+		Assertions.assertEquals(4096, typeS.getMaximal().intValue());
 		Assertions.assertEquals(Rate.GOOD, typeS.getLatency());
 		Assertions.assertEquals(ProvStorageOptimized.DURABILITY, typeS.getOptimized());
 
@@ -391,7 +390,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	@Test
 	void installOnLine() throws Exception {
 		configuration.delete(OvhPriceImport.CONF_API_PRICES);
-		configuration.put(OvhPriceImport.CONF_REGIONS, "(gra|sbg).*");
+		configuration.put(OvhPriceImport.CONF_REGIONS, "(gra|sbg|waw).*");
 		configuration.put(OvhPriceImport.CONF_ITYPE, ".*");
 		configuration.put(OvhPriceImport.CONF_DTYPE, ".*");
 		configuration.put(OvhPriceImport.CONF_ENGINE, "(MYSQL)");
@@ -412,19 +411,20 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0, provResource.getConfiguration(subscription).getCost().getMin(), DELTA); // 0
 
 		var lookup = qiResource.lookup(subscription,
-				builder().cpu(2).ram(15000).os(VmOs.WINDOWS).location("sbg5").usage("36month").build());
-		Assertions.assertEquals("sbg5/monthly.postpaid/win-r2-15", lookup.getPrice().getCode());
+				builder().cpu(2).ram(15000).os(VmOs.WINDOWS).location("sbg").usage("36month").build());
+
+		Assertions.assertEquals("WINDOWS/sbg/monthly.postpaid/b2-15", lookup.getPrice().getCode());
 
 		// Request an instance for a generic Linux OS
 		lookup = qiResource.lookup(subscription,
-				builder().type("c2-120").os(VmOs.LINUX).location("gra7").usage("dev").build());
-		Assertions.assertEquals("gra7/consumption/c2-120", lookup.getPrice().getCode());
+				builder().type("c2-120").os(VmOs.LINUX).location("gra").usage("dev").build());
+		Assertions.assertEquals("LINUX/gra/consumption/c2-120", lookup.getPrice().getCode());
 
 		// New instance for "s-1vcpu-1gb"
 		var ivo = new QuoteInstanceEditionVo();
 		ivo.setCpu(1d);
 		ivo.setRam(1);
-		ivo.setLocation("gra7");
+		ivo.setLocation("gra");
 		ivo.setPrice(lookup.getPrice().getId());
 		ivo.setName("server1");
 		ivo.setMaxQuantity(2);
@@ -438,21 +438,21 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		Assertions.assertEquals(0,
 				qsResource.lookup(subscription,
-						QuoteStorageQuery.builder().size(5).location("sgb5").instance(createInstance.getId()).build())
+						QuoteStorageQuery.builder().size(5).location("sgb").instance(createInstance.getId()).build())
 						.size());
 
 		// Lookup STANDARD SSD storage within the same region than the attached server
 		// volume
 		// ---------------------------------
 		var sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW)
-				.location("gra7").instance(createInstance.getId()).build()).get(0);
+				.location("gra").instance(createInstance.getId()).build()).get(0);
 		var price = sLookup.getPrice();
 		var type = price.getType();
-		Assertions.assertEquals("gra7/volume.classic", price.getCode());
-		Assertions.assertEquals("volume.classic", type.getCode());
-		Assertions.assertEquals("gra7", price.getLocation().getName());
+		Assertions.assertEquals("gra/volume", price.getCode());
+		Assertions.assertEquals("volume", type.getCode());
+		Assertions.assertEquals("gra", price.getLocation().getName());
 		Assertions.assertEquals("Gravelines", price.getLocation().getDescription());
-		Assertions.assertEquals(0.225, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(0.06, sLookup.getCost(), DELTA);
 
 		// New storage attached to the created instance
 		var svo = new QuoteStorageEditionVo();
@@ -468,15 +468,15 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// Lookup blob storage
 		// ---------------------------------
 		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.GOOD)
-				.location("gra7").optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
+				.location("gra").optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
 		price = sLookup.getPrice();
-		Assertions.assertEquals("gra7/storage", price.getCode());
+		Assertions.assertEquals("gra/storage", price.getCode());
 		type = price.getType();
 		Assertions.assertEquals("storage", type.getCode());
 		Assertions.assertEquals("Object Storage", type.getName());
-		Assertions.assertEquals("gra7", price.getLocation().getName());
+		Assertions.assertEquals("gra", price.getLocation().getName());
 		Assertions.assertEquals("Hauts-de-France", price.getLocation().getSubRegion());
-		Assertions.assertEquals(0.055, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(0.06, sLookup.getCost(), DELTA);
 
 		// New storage2
 		var svo2 = new QuoteStorageEditionVo();
@@ -492,14 +492,14 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// Lookup archive storage
 		// ---------------------------------
 		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.WORST)
-				.location("gra7").optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
+				.location("gra").optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
 		Assertions.assertEquals(0.01, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
-		Assertions.assertEquals("gra7/archive", price.getCode());
+		Assertions.assertEquals("gra/archive", price.getCode());
 		type = price.getType();
 		Assertions.assertEquals("archive", type.getCode());
 		Assertions.assertEquals("Cloud Archive", type.getName());
-		Assertions.assertEquals("gra7", price.getLocation().getName());
+		Assertions.assertEquals("gra", price.getLocation().getName());
 		Assertions.assertEquals("Hauts-de-France", price.getLocation().getSubRegion());
 
 		// New storage3
@@ -515,30 +515,31 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 		// Lookup snapshot storage
 		// ---------------------------------
-		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).location("gra7")
+		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).location("gra")
 				.optimized(ProvStorageOptimized.DURABILITY).build()).get(0);
 
 		// Lookup Database in an available region
 		// ---------------------------------
-		var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).build());
+		var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MYSQL").cpu(4).build());
+		//var dLookup = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).build());
 		var dPrice = dLookup.getPrice();
-		Assertions.assertEquals("gra7/monthly.postpaid/mysql-essential-db1-15", dPrice.getCode());
+		Assertions.assertEquals("gra/monthly.postpaid/mysql-essential-db1-15", dPrice.getCode());
 		var dType = dPrice.getType();
 		Assertions.assertEquals("essential/db1-15", dType.getCode());
 		Assertions.assertEquals("essential/db1-15", dType.getName());
-		Assertions.assertEquals("gra7", dPrice.getLocation().getName());
+		Assertions.assertEquals("gra", dPrice.getLocation().getName());
 		Assertions.assertEquals("Gravelines", dPrice.getLocation().getDescription());
 
 		// Lookup Database in an available region with partial usage (dev)
 		// ---------------------------------
 		dLookup = qbResource.lookup(subscription,
-				QuoteDatabaseQuery.builder().engine("MySQL").cpu(4).usage("dev").build());
+				QuoteDatabaseQuery.builder().engine("MYSQL").cpu(4).usage("dev").build());
 		dPrice = dLookup.getPrice();
-		Assertions.assertEquals("gra7/consumption/mysql-essential-db1-15", dPrice.getCode());
+		Assertions.assertEquals("gra/consumption/mysql-essential-db1-15", dPrice.getCode());
 		dType = dPrice.getType();
 		Assertions.assertEquals("essential/db1-15", dType.getCode());
 		Assertions.assertEquals("essential/db1-15", dType.getName());
-		Assertions.assertEquals("gra7", dPrice.getLocation().getName());
+		Assertions.assertEquals("gra", dPrice.getLocation().getName());
 		Assertions.assertEquals("Gravelines", dPrice.getLocation().getDescription());
 
 		em.flush();

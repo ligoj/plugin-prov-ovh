@@ -16,22 +16,26 @@ public class OvhAllPrices {
 
 	@Getter
 	@Setter
-	private List<OvhStorage> storage = Collections.emptyList();
+	private List<OvhAttrInstance> storage = Collections.emptyList();
 
 	@Getter
 	@Setter
-	private List<OvhStorage> archive = Collections.emptyList();
+	private List<OvhAttrInstance> archive = Collections.emptyList();
 
 	@Getter
 	@Setter
-	private List<OvhVolume> volumes = Collections.emptyList();
+	private List<OvhAttrInstance> volumes = Collections.emptyList();
 
 	@Getter
 	@Setter
-	private List<OvhInstancePrice> instances = Collections.emptyList();
+	private List<OvhAttrInstance> instances = Collections.emptyList();
 
 	@Getter
 	@Setter
-	private List<OvhStorage> snapshots = Collections.emptyList();
+	private List<OvhAttrInstance> snapshots = Collections.emptyList();
+	
+	@Getter
+	@Setter
+	private List<OvhAttrInstance> databases = Collections.emptyList();
 
 }
