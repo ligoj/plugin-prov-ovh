@@ -236,14 +236,14 @@ class OvhPriceImportTest extends AbstractServerTest {
 		checkImportStatus();
 
 		// Check the support
-		//Assertions.assertEquals(1, qs2Resource
-		//		.lookup(subscription, 0, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
-		//		.size());
+		Assertions.assertEquals(1, qs2Resource
+				.lookup(subscription, 0, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
+				.size());
 
-		//final var lookupSu = qs2Resource
-		//		.lookup(subscription, 0, null, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST).get(0);
-		//Assertions.assertEquals("Enterprise", lookupSu.getPrice().getType().getName());
-		//Assertions.assertEquals(5850.0d, lookupSu.getCost(), DELTA);
+		final var lookupSu = qs2Resource
+				.lookup(subscription, 0, null, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST).get(0);
+		Assertions.assertEquals("Enterprise", lookupSu.getPrice().getType().getName());
+		Assertions.assertEquals(5850.0d, lookupSu.getCost(), DELTA);
 
 		// Check the database
 		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
@@ -257,9 +257,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 
 	private void checkImportStatus() {
 		final var status = this.resource.getImportCatalogResource().getTask("service:prov:ovh");
-		Assertions.assertEquals(5, status.getDone());//7
+		Assertions.assertEquals(7, status.getDone());
 		Assertions.assertEquals(6, status.getWorkload());
-		Assertions.assertEquals("install-vm-storage", status.getPhase());//support
+		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbPrices().intValue() >= 18);//18
 		Assertions.assertTrue(status.getNbTypes().intValue() >= 9);//9
@@ -360,7 +360,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		var storage = storages.get(1);
 		Assertions.assertEquals(1.2d, storage.getCost(), DELTA);
 		Assertions.assertEquals(100, storage.getSize(), DELTA);
-		Assertions.assertNotNull(storage.getQuoteInstance());
 		final var typeS = storage.getPrice().getType();
 		Assertions.assertEquals("storage", typeS.getCode());
 		Assertions.assertEquals("Object Storage", typeS.getName());
@@ -368,7 +367,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(200, typeS.getThroughput());
 		Assertions.assertEquals(0d, storage.getPrice().getCostTransaction(), DELTA);
 		Assertions.assertEquals(1d, typeS.getMinimal());
-		Assertions.assertEquals(4096, typeS.getMaximal().intValue());
 		Assertions.assertEquals(Rate.GOOD, typeS.getLatency());
 		Assertions.assertEquals(ProvStorageOptimized.DURABILITY, typeS.getOptimized());
 
@@ -483,7 +481,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		svo2.setSize(100);
 		svo2.setName("storage2");
 		svo2.setSubscription(subscription);
-		// svo2.setInstance(createInstance2.getId());
 		svo2.setType(sLookup.getPrice().getType().getCode());
 		var createStorage2 = qsResource.create(svo2);
 		Assertions.assertTrue(createStorage2.getTotal().getMin() > 1);
@@ -507,7 +504,6 @@ class OvhPriceImportTest extends AbstractServerTest {
 		svo3.setSize(100);
 		svo3.setName("storage3");
 		svo3.setSubscription(subscription);
-		// svo.setInstance(createInstance.getId());
 		svo3.setType(sLookup.getPrice().getType().getCode());
 		var createStorage3 = qsResource.create(svo3);
 		Assertions.assertTrue(createStorage3.getTotal().getMin() > 1);

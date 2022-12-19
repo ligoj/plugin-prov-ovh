@@ -138,9 +138,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		// Nothing to extend
 	};
 
-	private static final TypeReference<List<OvhFlavor>> FLAVOR_LIST = new TypeReference<>() {
+	//private static final TypeReference<List<OvhFlavor>> FLAVOR_LIST = new TypeReference<>() {
 		// Nothing to extend
-	};
+	//};
 
 	private static final TypeReference<List<OvhAttrInstance>> DATABASE_LIST = new TypeReference<>() {
 		// Nothing to extend
@@ -152,13 +152,13 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 		};
 
-	private static final TypeReference<List<OvhDatabaseAvaibility>> DATABASE_AVAIBILITY_LIST = new TypeReference<>() {
+	//private static final TypeReference<List<OvhDatabaseAvaibility>> DATABASE_AVAIBILITY_LIST = new TypeReference<>() {
 		// Nothing to extend OvhDatabaseCapabilities
-	};
+	//};
 
-	private static final TypeReference<OvhDatabaseCapabilities> DATABASE_CAPABILITIES = new TypeReference<>() {
+	//private static final TypeReference<OvhDatabaseCapabilities> DATABASE_CAPABILITIES = new TypeReference<>() {
 		// Nothing to extend
-	};
+	//};
 
 	/**
 	 * Install or update prices.
@@ -213,7 +213,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		installInstancePrices(context, prices, hourlyTerm, monthlyTerm);
 		installDatabasePrices(context, hourlyTerm, monthlyTerm, prices);
 		installStoragePrices(context, prices);
-//		installSupportPrices(context);
+		installSupportPrices(context);
 	}
 
 	private void installSupportPrices(final UpdateContext context) throws IOException {
@@ -444,8 +444,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 								databases.add(priceObj);
 							}
 						}
-						
-						// ai-notebook.ai1-1-cpu.minute.consumption
+
 						if (planCode.contains("instance") && !planCode.contains("bandwidth")|| planCode.contains("b2-") || planCode.contains("c2-")
 								|| planCode.contains("t1-") || planCode.contains("t2-")|| planCode.contains("i1-") && !planCode.contains(".ai1-1")|| planCode.contains("d2-")) {
 							if (planPrice.get("attr-8") != null && planCode.contains("t1-") || planCode.contains("t2-") ) {
@@ -471,11 +470,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 								priceObj.setPublicNetwork((String)planPrice.get("attr-4"));
 								priceObj.setPrivateNetwork((String)planPrice.get("attr-5"));
 								var price = (String)planPrice.get("attr-6");
-								if (price != null) {
-									priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-6")));
-								} else {
-									log.info("not price");
-								}
 							}
 							instances.add(priceObj);
 						}
@@ -484,7 +478,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 							priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-1")));
 							snapshots.add(priceObj);
 						}
-						
 					});
 		});
 		result.setArchive(archives);
@@ -506,27 +499,14 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			       case "linux.monthly": 
 			    	   priceObj.setMonthlyLinuxCost((Double) Double.parseDouble(value));
 			           break;
-			   
-			       case "linux.hourly":
-			    	   priceObj.setHourlyLinuxCost((Double) Double.parseDouble(value));
-			           break;
-			   
+
 			       case "windows.monthly":
 			    	   priceObj.setMonthlyWindowsCost((Double) Double.parseDouble(value));
 			           break;
-			           
-			       case "windows.hourly":
-			    	   priceObj.setHourlyWindowsCost((Double) Double.parseDouble(value));
-			           break;
-			           
+
 			       case "MonthlyCost":
 			    	   priceObj.setMonthlyCost((Double) Double.parseDouble(value));
 			           break;
-			           
-			       case "HourlyCost":
-			    	   priceObj.setHourlyCost((Double) Double.parseDouble(value));
-			           break;
-			         
 			   }
 			}else if (value.contains("Included") == false) {
 				value = value.replace(",", "");
@@ -600,29 +580,12 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			if (!isEnabledOs(context, os)) {
 					return;			
 			}
-			
-			switch (value) {
-			case "windows" :
-				installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyWindowsCost() * context.getHoursMonth(), region);
-				installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyWindowsCost(), region);
-				break;
-				
-			case "linux" :
-				installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyLinuxCost() * context.getHoursMonth(), region);
-				installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyLinuxCost(), region);
-				break;
-				
-			default :
-				if (instance.getHourlyCost()!= null){
-					installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyCost() * context.getHoursMonth(), region);
-				}
-				
-				if (instance.getMonthlyCost()!= null) {
-					installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyCost(), region);
-				}
-			break;
-			
-			}
+
+			var hourly = value == "windows" ? instance.getHourlyWindowsCost() : instance.getHourlyLinuxCost();
+			var monthly = value == "windows" ? instance.getMonthlyWindowsCost() : instance.getMonthlyLinuxCost();
+
+			installInstancePrice(context, hourlyTerm, os, type, hourly * context.getHoursMonth(), region);
+			installInstancePrice(context, monthlyTerm, os, type, monthly, region);
 	}
 
 	@Override
@@ -664,7 +627,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setLatency(Rate.BEST);
 			t.setDurability9(7);
 			t.setMaximal(4 * 1024d); // 4TiB
-			switch (p.getName()) {
+			//switch (p.getName()) {
+			switch (p.getPlanCode().replace(".consumption", "")) {
 			case "volume.classic": {
 				t.setIops(250);
 				t.setName("Classic");
@@ -851,12 +815,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setCpu(database.getCPU());
 			t.setRam(database.getRAM()); // Convert to MiB * 1024.0
 			t.setAutoScale(false);
-			//t.setDescription(String.format(
-			//		"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
-			//				+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
-			//				database.getVersion(), database.getBackup(), database.getMinDiskSize(), database.getMaxDiskSize(),
-			//				database.getMinNodeNumber(), database.getMaxNodeNumber(), database.getNetwork(), database.getStorage(),
-			//				database.getBackupRetention(), database.getDescription()));
+			t.setDescription(String.format(
+					"{\"Dedicated node\":\"%s\",\"Private network\":\"%s\",\"Public Network\":\"%s\",\"storage\":\"%s\"}",
+					database.getDedicatedNode(), database.getPrivateNetwork(), database.getPublicNetwork(),database.getStorage()));
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);
