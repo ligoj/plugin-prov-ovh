@@ -4,6 +4,7 @@
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.build.Plugin.Engine;
 
 /**
  * The provisioning price service for AWS. Manage install or update of prices.
@@ -136,21 +138,27 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		// Nothing to extend
 	};
 
-	private static final TypeReference<List<OvhFlavor>> FLAVOR_LIST = new TypeReference<>() {
+	//private static final TypeReference<List<OvhFlavor>> FLAVOR_LIST = new TypeReference<>() {
+		// Nothing to extend
+	//};
+
+	private static final TypeReference<List<OvhAttrInstance>> DATABASE_LIST = new TypeReference<>() {
 		// Nothing to extend
 	};
+	
+	private static final TypeReference<List<Map<String,Object>>> DATABASE_LIST2 = new TypeReference<>() {
 
-	private static final TypeReference<List<OvhDatabasePrice>> DATABASE_LIST = new TypeReference<>() {
 		// Nothing to extend
-	};
 
-	private static final TypeReference<List<OvhDatabaseAvaibility>> DATABASE_AVAIBILITY_LIST = new TypeReference<>() {
+		};
+
+	//private static final TypeReference<List<OvhDatabaseAvaibility>> DATABASE_AVAIBILITY_LIST = new TypeReference<>() {
 		// Nothing to extend OvhDatabaseCapabilities
-	};
+	//};
 
-	private static final TypeReference<OvhDatabaseCapabilities> DATABASE_CAPABILITIES = new TypeReference<>() {
+	//private static final TypeReference<OvhDatabaseCapabilities> DATABASE_CAPABILITIES = new TypeReference<>() {
 		// Nothing to extend
-	};
+	//};
 
 	/**
 	 * Install or update prices.
@@ -202,10 +210,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		var monthlyTerm = installPriceTerm(context, "monthly.postpaid", 1);
 		final var prices = getPrices();
 
-//		installInstancePrices(context, prices, hourlyTerm, monthlyTerm);
-//		installDatabasePrices(context, hourlyTerm, monthlyTerm);
-//		installStoragePrices(context, prices);
-//		installSupportPrices(context);
+		installInstancePrices(context, prices, hourlyTerm, monthlyTerm);
+		installDatabasePrices(context, hourlyTerm, monthlyTerm, prices);
+		installStoragePrices(context, prices);
+		installSupportPrices(context);
 	}
 
 	private void installSupportPrices(final UpdateContext context) throws IOException {
@@ -234,62 +242,49 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	// Instal instance prices
 	private void installInstancePrices(final UpdateContext context, final OvhAllPrices prices,
 			final ProvInstancePriceTerm hourlyTerm, ProvInstancePriceTerm monthlyTerm) throws IOException {
-//		final var flavors = getFlavors().stream().collect(Collectors.toMap(OvhFlavor::getId, Function.identity()));
-//
+
 //		// For each price/region/OS/software
 //		// Install term, type and price
-//		nextStep(context, "install-vm");
-//		final var instances = prices.getInstances();
-//		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
-//				.forEach(i -> installInstancePrice(context, i, flavors, hourlyTerm, monthlyTerm));
+		nextStep(context, "install-vm");
+		final var instances = prices.getInstances();
+		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
+				.forEach(i -> installInstancePrice(context, i, hourlyTerm, monthlyTerm));
 	}
 
 	// Instal database prices
 	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
-			final ProvInstancePriceTerm monthlyTerm) throws IOException {
+			final ProvInstancePriceTerm monthlyTerm , final OvhAllPrices prices) throws IOException {
 		// Database
 		nextStep(context, "install-database");
 		final var node = context.getNode();
 		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
 				.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
-
-		// Build a prices map cnverting code
-		// from <code>databases.$ENGINE-$PLAN-$FLAVOR.hour.consumption</code>
-		// to <code>$ENGINE-$PLAN-$FLAVOR</code>.
-//		final var pricesByCode = databasesPrices.stream().collect(Collectors.toMap(
-//				p -> p.getPlanCode().replace("databases.", "").replace(".hour.consumption", ""), Function.identity()));
-//		databasesAvaibility.stream()
-//				.filter(c -> isEnabledEngine(context, c.getEngine()) && isEnabledDatabaseType(context, c.getFlavor())
-//						&& enginesByName.containsKey(c.getEngine()) && flavorsByName.containsKey(c.getFlavor())
-//						&& plansByName.containsKey(c.getPlan()))
-//				.forEach(c -> installDatabasePrices(context, hourlyTerm, monthlyTerm, flavorsByName, plansByName,
-//						pricesByCode, c));
+		
+		prices.getDatabases().stream()
+				.filter(p ->  isEnabledEngine(context, p.getEngine()) && isEnabledDatabaseType(context, p.getFlavor()))
+				.forEach((p) -> { 
+						p.getPlanCode().replace("databases.", "").replace(".hour.consumption", "");
+						installDatabasePrices(context, hourlyTerm, monthlyTerm,p);
+					}
+				);
 	}
 
 	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
-			final ProvInstancePriceTerm monthlyTerm, final Map<String, OvhDatabaseFlavor> flavorsByName,
-			final Map<String, OvhDatabasePlan> plansByName, final Map<String, OvhDatabasePrice> pricesByCode,
-			final OvhDatabaseAvaibility c) {
-		final var engine = c.getEngine();
-		final var regionGroup = c.getRegion().toLowerCase();
-		context.getUsedRegions().stream().filter(r -> r.toLowerCase().startsWith(regionGroup))
-				.filter(r -> !r.toLowerCase().equals(regionGroup)).forEach(regionName -> {
+			final ProvInstancePriceTerm monthlyTerm, final OvhAttrInstance p) {
+		final var engine = p.getEngine();
+		final var regionGroup = p.getRegion().toLowerCase();
+		context.getUsedRegions().stream()
+				.forEach(regionName -> {
 					final var region = context.getRegions().get(regionName);
-					final var codeType = "%s/%s".formatted(c.getPlan(), c.getFlavor());
-					final var codePricePlan = "%s-%s-%s".formatted(c.getEngine(), c.getPlan(), c.getFlavor());
-					final var pricePlan = pricesByCode.get(codePricePlan);
-					if (pricePlan == null) {
-						log.warn("Price not found for plan code {}", codePricePlan);
-						return;
-					}
-					var type = installDatabaseType(context, codeType, flavorsByName.get(c.getFlavor()), c, pricePlan,
-							plansByName.get(c.getPlan()));
+					final var codeType = "%s/%s".formatted(p.getPlan(), p.getFlavor());
+					final var codePricePlan = "%s-%s-%s".formatted(p.getEngine(), p.getPlan(), p.getFlavor());
+					var type = installDatabaseType(context, codeType, p.getFlavor(), p);
 
 					// Install hourly based price
-					installDatabasePrice(context, hourlyTerm, codePricePlan, type, pricePlan.getHourlyCost(),
+					installDatabasePrice(context, hourlyTerm, codePricePlan, type, p.getHourlyCost(),
 							context.getHoursMonth(), engine, region);
 					// Install monthly based price
-					installDatabasePrice(context, monthlyTerm, codePricePlan, type, pricePlan.getMonthlyCost(), 1,
+					installDatabasePrice(context, monthlyTerm, codePricePlan, type, p.getMonthlyCost(), 1,
 							engine, region);
 				});
 	}
@@ -357,32 +352,240 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		}
 	}
 
-	private List<OvhDatabasePrice> getPrices() throws IOException {
-		return getResource(this::getPricesUrl, null, DATABASE_LIST);
+	private OvhAllPrices getPrices() throws IOException {
+		final var pricesMap = getResource(this::getPricesUrl, null, DATABASE_LIST2);
+		final OvhAllPrices result = new OvhAllPrices();
+		final List<OvhAttrInstance> storages = new ArrayList<>();
+		final List<OvhAttrInstance> archives = new ArrayList<>();
+		final List<OvhAttrInstance> volumes = new ArrayList<>();
+		final List<OvhAttrInstance> instances = new ArrayList<>();
+		final List<OvhAttrInstance> snapshots = new ArrayList<>();
+		final List<OvhAttrInstance> databases = new ArrayList<>();
+		pricesMap.stream()
+		.filter(p -> p.get("term") != null)
+		.forEach(planPrice -> {
+			planPrice.keySet().stream().filter(prop -> !prop.equals("term") && !prop.equals("planCode")&& !prop.equals("regions") && !prop.equals("attr-0")&&
+					!prop.equals("attr-1")&&!prop.equals("attr-2")&&!prop.equals("attr-3")&&!prop.equals("attr-4")&&!prop.equals("attr-5")&&!prop.equals("attr-6")&&!prop.equals("attr-7"))
+					.forEach(region -> {
+						// Each property is a region code
+						var regionalPrice = (Map<String, String>) planPrice.get(region);
+						var priceObj = new OvhAttrInstance();
+						var planCode = (String) planPrice.get("planCode");
+						priceObj.setPlanCode((String) planCode);
+						priceObj.setRegion(region.toLowerCase());
+						var monthlyPrice = regionalPrice.get("monthly");
+						var hourlyPrice = regionalPrice.get("hourly");
+						var monthlyWindowsPrice= regionalPrice.get("windows.monthly");
+						var hourlyWindowsPrice = regionalPrice.get("windows.hourly");
+						var monthlyLinuxPrice= regionalPrice.get("linux.monthly");
+						var hourlyLinuxPrice = regionalPrice.get("linux.hourly");
+						var ram = (String)planPrice.get("attr-1");
+						var cpu = (String)planPrice.get("attr-2");
+						var details = planCode.replace("databases.", "").replace(".hour.consumption", "");
+						var tabDetails = details.split("-");
+
+						priceObj=setPrice(monthlyWindowsPrice,priceObj,"windows.monthly");
+						priceObj=setPrice(hourlyWindowsPrice,priceObj,"windows.hourly");
+						priceObj=setPrice(monthlyLinuxPrice,priceObj,"linux.monthly");
+						priceObj=setPrice(hourlyLinuxPrice,priceObj,"linux.hourly");
+						priceObj=setPrice(monthlyPrice,priceObj,"MonthlyCost");
+						priceObj=setPrice(hourlyPrice,priceObj,"HourlyCost");
+
+						priceObj.setName((String)planPrice.get("attr-0"));
+						
+						var planPrice2 = planPrice;
+						if (planCode.contains("storage") && !planCode.contains("bandwidth")) {
+							var price = (String)planPrice.get("attr-1");
+							if (!price.contains("Included")) {
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-1")));
+								storages.add(priceObj);
+							}		
+						}
+						
+						if (planCode.contains("archive")) {
+							priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-1")));
+							archives.add(priceObj);
+						}
+						
+						if (planCode.contains("volume.")) {
+							if (planPrice.get("attr-3") != null ) {
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-3")));
+							} else if (planPrice.get("attr-2") != null ) {
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-2")));
+							}else {
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-1")));
+							}
+							volumes.add(priceObj);
+						}
+						
+						if (planCode.contains("databases")|| planCode.contains("db1-")|| planCode.contains("db2-")) {		
+							if (planPrice.get("attr-7") != null ) {
+								priceObj.setRAM((Double)Double.parseDouble(ram.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", ""))*1024);
+								priceObj.setCPU((Double)Double.parseDouble(cpu.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", "")));
+								priceObj.setStorage((String)planPrice.get("attr-3"));
+								priceObj.setPublicNetwork((String)planPrice.get("attr-4"));
+								priceObj.setPrivateNetwork((String)planPrice.get("attr-5"));
+								priceObj.setDedicatedNode((String)planPrice.get("attr-6"));
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-7")));
+								priceObj.setEngine((String)tabDetails[0]);
+								priceObj.setPlan((String)tabDetails[1]);
+								priceObj.setFlavor((String)tabDetails[2]+"-"+tabDetails[3]);
+								databases.add(priceObj);
+							}else if (tabDetails[1] != null){
+								priceObj.setRAM((Double)Double.parseDouble(ram.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", ""))*1024);
+								priceObj.setCPU((Double)Double.parseDouble(cpu.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", "")));
+								priceObj.setPublicNetwork((String)planPrice.get("attr-3"));
+								priceObj.setPrivateNetwork((String)planPrice.get("attr-4"));
+								priceObj.setDedicatedNode((String)planPrice.get("attr-5"));
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-6")));
+								priceObj.setEngine((String)tabDetails[0]);
+								priceObj.setPlan((String)tabDetails[1]);
+								priceObj.setFlavor((String)tabDetails[2]+"-"+tabDetails[3]);
+								databases.add(priceObj);
+							}
+						}
+
+						if (planCode.contains("instance") && !planCode.contains("bandwidth")|| planCode.contains("b2-") || planCode.contains("c2-")
+								|| planCode.contains("t1-") || planCode.contains("t2-")|| planCode.contains("i1-") && !planCode.contains(".ai1-1")|| planCode.contains("d2-")) {
+							if (planPrice.get("attr-8") != null && planCode.contains("t1-") || planCode.contains("t2-") ) {
+								priceObj.setRAM((Double)Double.parseDouble(ram.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", ""))*1024);
+								priceObj.setCPU((Double)Double.parseDouble(cpu.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", "")));
+								priceObj.setGPU((String)planPrice.get("attr-2"));
+								priceObj.setStorage((String)planPrice.get("attr-4"));
+								priceObj.setPublicNetwork((String)planPrice.get("attr-5"));
+								priceObj.setPrivateNetwork((String)planPrice.get("attr-6"));
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-7")));
+							} else if (planPrice.get("attr-7") != null && planCode.contains("i1-") || planCode.contains("t1-") ) {
+								priceObj.setRAM((Double)Double.parseDouble(ram.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", ""))*1024);
+								priceObj.setCPU((Double)Double.parseDouble(cpu.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", "")));
+								priceObj.setStorage((String)planPrice.get("attr-3"));
+								priceObj.setNVMeDisks((String)planPrice.get("attr-4"));
+								priceObj.setPublicNetwork((String)planPrice.get("attr-5"));
+								priceObj.setPrivateNetwork((String)planPrice.get("attr-6"));
+								priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-7")));
+							}else if(planPrice.get("attr-2")!= null){
+								priceObj.setRAM((Double)Double.parseDouble(ram.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", ""))*1024);
+								priceObj.setCPU((Double)Double.parseDouble(cpu.replaceAll("[/a-z A-Z]*", "").replaceAll("\\xA0", "")));
+								priceObj.setStorage((String)planPrice.get("attr-3"));
+								priceObj.setPublicNetwork((String)planPrice.get("attr-4"));
+								priceObj.setPrivateNetwork((String)planPrice.get("attr-5"));
+								var price = (String)planPrice.get("attr-6");
+							}
+							instances.add(priceObj);
+						}
+						
+						if (planCode.contains("snapshot.")) {
+							priceObj.setPrice((Double)Double.parseDouble((String)planPrice.get("attr-1")));
+							snapshots.add(priceObj);
+						}
+					});
+		});
+		result.setArchive(archives);
+		result.setDatabases(databases);
+		result.setInstances(instances);
+		result.setSnapshots(snapshots);
+		result.setStorage(storages);
+		result.setVolumes(volumes);
+		return result;
+	}
+	
+	private OvhAttrInstance setPrice(String value ,OvhAttrInstance priceObj , String attr ) {
+		if (value != null ) {
+			if(StringUtils.countMatches(value,".")==1 && value.contains(",") == true && value.contains("Included") == false ) { //Pattern.compile(value).matcher([/a-z A-Z]*).find()
+				value = value.replace(",", ".");
+				value = value.replaceFirst("\\.", "").replaceAll("[/a-z A-Z]*", "").replaceAll("\\s+","");
+				switch(attr){
+				   
+			       case "linux.monthly": 
+			    	   priceObj.setMonthlyLinuxCost((Double) Double.parseDouble(value));
+			           break;
+
+			       case "windows.monthly":
+			    	   priceObj.setMonthlyWindowsCost((Double) Double.parseDouble(value));
+			           break;
+
+			       case "MonthlyCost":
+			    	   priceObj.setMonthlyCost((Double) Double.parseDouble(value));
+			           break;
+			   }
+			}else if (value.contains("Included") == false) {
+				value = value.replace(",", "");
+				switch(attr){
+				   
+			       case "linux.monthly": 
+						priceObj.setMonthlyLinuxCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			   
+			       case "linux.hourly":
+						priceObj.setHourlyLinuxCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			   
+			       case "windows.monthly":
+						priceObj.setMonthlyWindowsCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			           
+			       case "windows.hourly":
+						priceObj.setHourlyWindowsCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			           
+			       case "MonthlyCost":
+						priceObj.setMonthlyCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			         
+			       case "HourlyCost":
+						priceObj.setHourlyCost((Double) Double.parseDouble(value.replaceAll("[/a-z A-Z]*", "")));
+			           break;
+			   }
+			}
+		}
+		return priceObj;
 	}
 
-	private void installInstancePrice(final UpdateContext context, final OvhInstancePrice instance,
-			final Map<String, OvhFlavor> flavors, final ProvInstancePriceTerm hourlyTerm,
+	private void installInstancePrice(final UpdateContext context, final OvhAttrInstance instance, final ProvInstancePriceTerm hourlyTerm,
 			final ProvInstancePriceTerm monthlyTerm) {
-		final var flavor = flavors.get(instance.getFlavorId());
-		if (flavor == null) {
-			log.warn("Unknown flavor id {}", instance.getFlavorId());
+		if (instance == null) {
+			log.warn("Unknown instance");
 			return;
 		}
-		// Check the filtered types and OS
-		final var os = getOs(flavor.getOsType());
-		if (!isEnabledOs(context, os) || !isEnabledType(context, flavor.getName())) {
+		
+		if(!isEnabledType(context, instance.getPlanCode())){
 			return;
 		}
-
+		
 		final var region = installRegion(context, instance.getRegion().toLowerCase());
-
+		
+		// Mark this region as used
+		context.getUsedRegions().add(instance.getRegion().toLowerCase());
+					
+		final var type = installInstanceType(context, instance.getName(), instance);
+		
+		if (instance.getHourlyWindowsCost()!= null ) {
+			installInstancePrice2( context,  hourlyTerm,  getOs("windows"), instance, region ,  type ,  monthlyTerm ,  "windows" );
+		}
+		
+		if(instance.getHourlyLinuxCost()!= null) {
+			installInstancePrice2( context,  hourlyTerm,  getOs("linux"), instance, region ,  type ,  monthlyTerm ,  "linux" );
+		}
+		
+		installInstancePrice2( context,  hourlyTerm,  getOs("linux"), instance, region ,  type ,  monthlyTerm , "");
+		
 		// Mark this region as used
 		context.getUsedRegions().add(instance.getRegion().toLowerCase());
 
-		final var type = installInstanceType(context, flavor.getName(), flavor);
-		installInstancePrice(context, hourlyTerm, os, type, instance.getHourlyCost() * context.getHoursMonth(), region);
-		installInstancePrice(context, monthlyTerm, os, type, instance.getMonthlyCost(), region);
+	}
+	
+	private void installInstancePrice2(UpdateContext context, ProvInstancePriceTerm hourlyTerm, VmOs os,
+			OvhAttrInstance instance,ProvLocation region , ProvInstanceType type , ProvInstancePriceTerm monthlyTerm , String value) {
+		
+			if (!isEnabledOs(context, os)) {
+					return;			
+			}
+
+			var hourly = value == "windows" ? instance.getHourlyWindowsCost() : instance.getHourlyLinuxCost();
+			var monthly = value == "windows" ? instance.getMonthlyWindowsCost() : instance.getMonthlyLinuxCost();
+
+			installInstancePrice(context, hourlyTerm, os, type, hourly * context.getHoursMonth(), region);
+			installInstancePrice(context, monthlyTerm, os, type, monthly, region);
 	}
 
 	@Override
@@ -416,14 +619,16 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setOptimized(ProvStorageOptimized.DURABILITY);
 
 		});
-		installStorage(context, prices.getVolumes(), p -> p.getName(), (t, p) -> {
+		
+		installStorage(context, prices.getVolumes(), p -> p.getPlanCode().replace(".consumption", "").replace(".snapshot", ""), (t, p) -> {
 			t.setIops(7500);
 			t.setThroughput(300);
 			t.setInstanceType("%");
 			t.setLatency(Rate.BEST);
 			t.setDurability9(7);
 			t.setMaximal(4 * 1024d); // 4TiB
-			switch (p.getName()) {
+			//switch (p.getName()) {
+			switch (p.getPlanCode().replace(".consumption", "")) {
 			case "volume.classic": {
 				t.setIops(250);
 				t.setName("Classic");
@@ -455,8 +660,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		});
 
 	}
-
-	private <P extends OvhStorage> void installStorage(UpdateContext context, final List<P> prices,
+	
+	private <P extends OvhAttrInstance> void installStorage(UpdateContext context, final List<P> prices,
 			final Function<P, String> toCodeType, final BiConsumer<ProvStorageType, P> filler) {
 		prices.stream().filter(p -> isEnabledRegion(context, p.getRegion().toLowerCase())).forEach(p -> {
 			final var codeType = toCodeType.apply(p);
@@ -473,7 +678,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install or update a storage type.
 	 */
-	private <P extends OvhStorage> ProvStorageType installStorageType(final UpdateContext context, final String code,
+	//extends OvhStorage
+	private <P extends OvhAttrInstance> ProvStorageType installStorageType(final UpdateContext context, final String code,
 			final BiConsumer<ProvStorageType, P> aType, final P price) {
 		final var type = context.getStorageTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvStorageType();
@@ -518,7 +724,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os,
 			final ProvInstanceType type, final double monthlyCost, final ProvLocation region) {
 		final var price = context.getPrevious()
-				.computeIfAbsent(region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
+				.computeIfAbsent(os.name() + "/" + region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
 					// New instance price (not update mode)
 					final var newPrice = new ProvInstancePrice();
 					newPrice.setCode(code);
@@ -534,6 +740,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		});
 
 		// Update the cost
+		ipRepository.findAll();
 		saveAsNeeded(context, price, monthlyCost, ipRepository);
 	}
 
@@ -541,7 +748,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Install a new instance type as needed.
 	 */
 	private ProvInstanceType installInstanceType(final UpdateContext context, final String code,
-			final OvhFlavor aType) {
+			final OvhAttrInstance aType) {
 		final var type = context.getInstanceTypes().computeIfAbsent(code, c -> {
 			// New instance type (not update mode)
 			final var newType = new ProvInstanceType();
@@ -553,10 +760,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
 			t.setName(code);
-			t.setCpu(aType.getVcpus());
-			t.setRam((int) Math.ceil(aType.getRam() / 1000 * 1024)); // Convert in MiB
-			t.setDescription("{Disk: " + aType.getDisk() + ", Network: " + aType.getInboundBandwidth() + "/"
-					+ aType.getOutboundBandwidth() + "}");
+			t.setCpu(aType.getCPU());
+			t.setRam((int) Math.ceil(aType.getRAM())); // Convert in MiB / 1000 * 1024
+			t.setDescription("{Disk: " + aType.getStorage() + "}");
 			t.setAutoScale(false);
 
 			// Rating
@@ -595,8 +801,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Install a new database type as needed.
 	 */
 	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-			final OvhDatabaseFlavor aType, final OvhDatabaseAvaibility oType, final OvhDatabasePrice databasePrice,
-			final OvhDatabasePlan plan) {
+			final String aType, final OvhAttrInstance database) {
 		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
@@ -607,15 +812,12 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
 			t.setName(code);
-			t.setCpu(aType.getCore());
-			t.setRam(aType.getMemory() * 1024.0); // Convert to MiB
+			t.setCpu(database.getCPU());
+			t.setRam(database.getRAM()); // Convert to MiB * 1024.0
 			t.setAutoScale(false);
 			t.setDescription(String.format(
-					"{\"version\":\"%s\",\"backup\":\"%s\",\"minDiskSize\":\"%s\",\"maxDiskSize\":\"%s\",\"minNodeNumber\":\"%s\","
-							+ "\"maxNodeNumber\":\"%s\",\"network\":\"%s\",\"storage\":\"%s\",\"backupRetention\":\"%s\",\"description\":\"%s\"}",
-					oType.getVersion(), oType.getBackup(), oType.getMinDiskSize(), oType.getMaxDiskSize(),
-					oType.getMinNodeNumber(), oType.getMaxNodeNumber(), oType.getNetwork(), aType.getStorage(),
-					plan.getBackupRetention(), plan.getDescription()));
+					"{\"Dedicated node\":\"%s\",\"Private network\":\"%s\",\"Public Network\":\"%s\",\"storage\":\"%s\"}",
+					database.getDedicatedNode(), database.getPrivateNetwork(), database.getPublicNetwork(),database.getStorage()));
 
 			// Rating
 			t.setCpuRate(Rate.MEDIUM);
