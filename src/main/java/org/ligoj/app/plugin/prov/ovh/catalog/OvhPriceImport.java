@@ -614,7 +614,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os,
 			final ProvInstanceType type, final double monthlyCost, final ProvLocation region) {
 		final var price = context.getPrevious()
-				.computeIfAbsent(os.name() + "/" + region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
+				.computeIfAbsent(os.name().toLowerCase()  + "/" + region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
 					// New instance price (not update mode)
 					final var newPrice = new ProvInstancePrice();
 					newPrice.setCode(code);
