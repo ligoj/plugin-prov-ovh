@@ -103,9 +103,9 @@ class OvhPriceImportTest extends AbstractServerTest {
 	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
-				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
+				new Class[]{Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
 						Parameter.class, ProvLocation.class, Subscription.class, ParameterValue.class,
-						ProvQuote.class },
+						ProvQuote.class},
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
 
@@ -211,7 +211,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		resetImportTask();
 		resource.install(false);
 		provResource.updateCost(subscription);
-		check(provResource.getConfiguration(subscription),1302.0d, 2602.6d, 1299.4d);
+		check(provResource.getConfiguration(subscription), 1302.0d, 2602.6d, 1299.4d);
 		checkImportStatus();
 
 		// Now, change a price within the remote catalog
@@ -436,7 +436,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		Assertions.assertEquals(0,
 				qsResource.lookup(subscription,
-						QuoteStorageQuery.builder().size(5).location("sgb").instance(createInstance.getId()).build())
+								QuoteStorageQuery.builder().size(5).location("sgb").instance(createInstance.getId()).build())
 						.size());
 
 		// Lookup STANDARD SSD storage within the same region than the attached server
