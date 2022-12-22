@@ -3,6 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,28 +15,23 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OvhAllPrices {
 
-	@Getter
-	@Setter
-	private List<OvhAttrInstance> storage = Collections.emptyList();
 
 	@Getter
-	@Setter
-	private List<OvhAttrInstance> archive = Collections.emptyList();
+	private final List<OvhAttrInstance> storage = new ArrayList<OvhAttrInstance>();
 
 	@Getter
-	@Setter
-	private List<OvhAttrInstance> volumes = Collections.emptyList();
+	private final List<OvhAttrInstance> archive = new ArrayList<OvhAttrInstance>();
 
 	@Getter
-	@Setter
-	private List<OvhAttrInstance> instances = Collections.emptyList();
+	private final List<OvhAttrInstance> volumes = new ArrayList<OvhAttrInstance>();
 
 	@Getter
-	@Setter
-	private List<OvhAttrInstance> snapshots = Collections.emptyList();
-	
+	private final List<OvhAttrInstance> instances = new ArrayList<OvhAttrInstance>();
+
 	@Getter
-	@Setter
-	private List<OvhAttrInstance> databases = Collections.emptyList();
+	private final List<OvhAttrInstance> snapshots = new ArrayList<OvhAttrInstance>();
+
+	@Getter
+	private final List<OvhAttrInstance> databases = new ArrayList<OvhAttrInstance>();
 
 }
