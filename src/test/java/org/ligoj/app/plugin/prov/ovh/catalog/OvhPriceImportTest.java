@@ -191,7 +191,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("monthly.postpaid", lookup.getPrice().getTerm().getCode());// monthly
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals(1.0, lookup.getPrice().getPeriod(), DELTA);
-		Assertions.assertEquals("LINUX/gra/monthly.postpaid/b2-30", lookup.getPrice().getCode());
+		Assertions.assertEquals("linux/gra/monthly.postpaid/b2-30", lookup.getPrice().getCode());
 		Assertions.assertEquals("b2-30", lookup.getPrice().getType().getCode());
 		Assertions.assertEquals("gra", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("Gravelines", lookup.getPrice().getLocation().getDescription());
@@ -200,12 +200,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 		// CPU Intensive
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(4096).build());
-		Assertions.assertEquals("LINUX/gra/monthly.postpaid/d2-4", lookup.getPrice().getCode());
+		Assertions.assertEquals("linux/gra/monthly.postpaid/d2-4", lookup.getPrice().getCode());
 
 		// General Purpose
 		lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
 				builder().cpu(2).ram(8000).build());
-		Assertions.assertEquals("LINUX/gra/monthly.postpaid/d2-8", lookup.getPrice().getCode());
+		Assertions.assertEquals("linux/gra/monthly.postpaid/d2-8", lookup.getPrice().getCode());
 
 		// Install again to check the update without change
 		resetImportTask();
@@ -411,12 +411,12 @@ class OvhPriceImportTest extends AbstractServerTest {
 		var lookup = qiResource.lookup(subscription,
 				builder().cpu(2).ram(15000).os(VmOs.WINDOWS).location("sbg").usage("36month").build());
 
-		Assertions.assertEquals("WINDOWS/sbg/monthly.postpaid/b2-15", lookup.getPrice().getCode());
+		Assertions.assertEquals("windows/sbg/monthly.postpaid/b2-15", lookup.getPrice().getCode());
 
 		// Request an instance for a generic Linux OS
 		lookup = qiResource.lookup(subscription,
 				builder().type("c2-120").os(VmOs.LINUX).location("gra").usage("dev").build());
-		Assertions.assertEquals("LINUX/gra/consumption/c2-120", lookup.getPrice().getCode());
+		Assertions.assertEquals("linux/gra/consumption/c2-120", lookup.getPrice().getCode());
 
 		// New instance for "s-1vcpu-1gb"
 		var ivo = new QuoteInstanceEditionVo();
