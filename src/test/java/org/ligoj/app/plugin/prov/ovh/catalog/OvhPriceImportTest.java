@@ -13,8 +13,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
