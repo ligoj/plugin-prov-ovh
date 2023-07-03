@@ -3,19 +3,8 @@
  */
 package org.ligoj.app.plugin.prov.ovh;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
 import jakarta.transaction.Transactional;
-
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.model.CacheCompany;
 import org.ligoj.app.iam.model.CacheUser;
-import org.ligoj.app.model.DelegateNode;
-import org.ligoj.app.model.Node;
-import org.ligoj.app.model.Parameter;
-import org.ligoj.app.model.ParameterValue;
-import org.ligoj.app.model.Project;
-import org.ligoj.app.model.Subscription;
+import org.ligoj.app.model.*;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.plugin.prov.ovh.catalog.OvhPriceImport;
@@ -40,6 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
  * Test class of {@link ProvOvhPluginResource}
@@ -61,10 +53,10 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
-				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
+				new Class[]{Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
 						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
-						ParameterValue.class },
-				StandardCharsets.UTF_8.name());
+						ParameterValue.class},
+				StandardCharsets.UTF_8);
 		this.subscription = getSubscription("gStack");
 		cacheManager.getCache("curl-tokens").clear();
 	}
@@ -108,9 +100,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		initSpringSecurityContext("any");
 
 		// Re-Install a new configuration
-		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.updateCatalog("service:prov:ovh:account", false);
-		}).getMessage());
+		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> resource.updateCatalog("service:prov:ovh:account", false)).getMessage());
 	}
 
 	private ProvOvhPluginResource newSpyResource() {
@@ -121,8 +111,6 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 
 	/**
 	 * prepare call to AWS
-	 *
-	 * @throws Exception exception
 	 */
 	@Test
 	void newRequest() {
@@ -144,14 +132,12 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 		final var resource = newSpyResource();
 		Mockito.doReturn(false).when(resource).validateAccess(ArgumentMatchers.anyInt());
 		Assertions.assertEquals("Cannot access to OVH services with these parameters",
-				Assertions.assertThrows(BusinessException.class, () -> {
-					resource.create(-1);
-				}).getMessage());
+				Assertions.assertThrows(BusinessException.class, () -> resource.create(-1)).getMessage());
 	}
 
 	@Test
 	void checkSubscriptionStatusUp() {
-		final var status = resource.checkSubscriptionStatus(subscription, null, new HashMap<String, String>());
+		final var status = resource.checkSubscriptionStatus(subscription, null, new HashMap<>());
 		Assertions.assertTrue(status.getStatus().isUp());
 	}
 
@@ -159,7 +145,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 	void checkSubscriptionStatusDown() {
 		final var resource = newSpyResource();
 		Mockito.doReturn(false).when(resource).validateAccess(ArgumentMatchers.anyInt());
-		final var status = resource.checkSubscriptionStatus(subscription, null, new HashMap<String, String>());
+		final var status = resource.checkSubscriptionStatus(subscription, null, new HashMap<>());
 		Assertions.assertFalse(status.getStatus().isUp());
 	}
 

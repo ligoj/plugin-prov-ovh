@@ -18,7 +18,7 @@ import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,7 +106,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 				new Class[]{Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
 						Parameter.class, ProvLocation.class, Subscription.class, ParameterValue.class,
 						ProvQuote.class},
-				StandardCharsets.UTF_8.name());
+				StandardCharsets.UTF_8);
 		this.subscription = getSubscription("gStack");
 
 		// Mock catalog import helper
@@ -261,51 +261,51 @@ class OvhPriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(6, status.getWorkload());
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertTrue(status.getNbPrices().intValue() >= 18);//18
-		Assertions.assertTrue(status.getNbTypes().intValue() >= 9);//9
+		Assertions.assertTrue(status.getNbPrices() >= 18);//18
+		Assertions.assertTrue(status.getNbTypes() >= 9);//9
 		Assertions.assertTrue(status.getNbLocations() >= 1);//1
 	}
 
 	private void mockServer() throws IOException {
 		configuration.put(OvhPriceImport.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
 		httpServer.stubFor(get(urlEqualTo("/price.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-				IOUtils.toString(new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), "UTF-8"))));
+				IOUtils.toString(new ClassPathResource("mock-server/ovh/prices.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.stubFor(get(urlEqualTo("/flavor.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-				IOUtils.toString(new ClassPathResource("mock-server/ovh/flavors.json").getInputStream(), "UTF-8"))));
+				IOUtils.toString(new ClassPathResource("mock-server/ovh/flavors.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.stubFor(
 				get(urlEqualTo("/database-availability.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/ovh/database-availability.json").getInputStream(),
-								"UTF-8"))));
+								StandardCharsets.UTF_8))));
 		httpServer.stubFor(
 				get(urlEqualTo("/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/ovh/database-capabilities.json").getInputStream(),
-								"UTF-8"))));
+								StandardCharsets.UTF_8))));
 		httpServer.stubFor(get(urlEqualTo("/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/database-price.json").getInputStream(), "UTF-8"))));
+						new ClassPathResource("mock-server/ovh/database-price.json").getInputStream(), StandardCharsets.UTF_8))));
 
 		httpServer.stubFor(
 				get(urlEqualTo("/v2/price.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
-						.toString(new ClassPathResource("mock-server/ovh/v2/prices.json").getInputStream(), "UTF-8"))));
+						.toString(new ClassPathResource("mock-server/ovh/v2/prices.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.stubFor(get(urlEqualTo("/v2/flavor.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/v2/flavors.json").getInputStream(), "UTF-8"))));
+						new ClassPathResource("mock-server/ovh/v2/flavors.json").getInputStream(), StandardCharsets.UTF_8))));
 
 		httpServer.stubFor(
 				get(urlEqualTo("/v2/database-availability.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/ovh/v2/database-availability.json").getInputStream(),
-								"UTF-8"))));
+								StandardCharsets.UTF_8))));
 		httpServer.stubFor(
 				get(urlEqualTo("/v2/database-capabilities.json")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/ovh/v2/database-capabilities.json").getInputStream(),
-								"UTF-8"))));
+								StandardCharsets.UTF_8))));
 		httpServer.stubFor(get(urlEqualTo("/v2/database-price.json"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/ovh/v2/database-price.json").getInputStream(), "UTF-8"))));
+						new ClassPathResource("mock-server/ovh/v2/database-price.json").getInputStream(), StandardCharsets.UTF_8))));
 
 		httpServer.start();
 	}
@@ -402,7 +402,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 	/**
 	 * Install and check
 	 */
-	private QuoteVo installAndConfigure() throws IOException, Exception {
+	private QuoteVo installAndConfigure() throws Exception {
 		resource.install(false);
 		em.flush();
 		em.clear();
@@ -439,7 +439,7 @@ class OvhPriceImportTest extends AbstractServerTest {
 								QuoteStorageQuery.builder().size(5).location("sgb").instance(createInstance.getId()).build())
 						.size());
 
-		// Lookup STANDARD SSD storage within the same region than the attached server
+		// Lookup STANDARD SSD storage within the same region as the attached server
 		// volume
 		// ---------------------------------
 		var sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW)
