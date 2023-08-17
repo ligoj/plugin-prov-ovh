@@ -57,7 +57,7 @@ class ProvOvhPluginResourceTest extends AbstractServerTest {
 						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
 						ParameterValue.class},
 				StandardCharsets.UTF_8);
-		this.subscription = getSubscription("gStack");
+		this.subscription = getSubscription("Jupiter");
 		cacheManager.getCache("curl-tokens").clear();
 	}
 
