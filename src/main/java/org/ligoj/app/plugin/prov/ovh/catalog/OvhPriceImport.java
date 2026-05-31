@@ -3,29 +3,46 @@
  */
 package org.ligoj.app.plugin.prov.ovh.catalog;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
-import org.ligoj.app.plugin.prov.catalog.AbstractUpdateContext;
-import org.ligoj.app.plugin.prov.model.*;
-import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
-import org.ligoj.bootstrap.core.INamableBean;
-import org.ligoj.bootstrap.core.curl.CurlProcessor;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.EnumUtils;
+import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
+import org.ligoj.app.plugin.prov.catalog.AbstractUpdateContext;
+import org.ligoj.app.plugin.prov.model.AbstractPrice;
+import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
+import org.ligoj.app.plugin.prov.model.ProvDatabasePrice;
+import org.ligoj.app.plugin.prov.model.ProvDatabaseType;
+import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
+import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
+import org.ligoj.app.plugin.prov.model.ProvInstanceType;
+import org.ligoj.app.plugin.prov.model.ProvLocation;
+import org.ligoj.app.plugin.prov.model.ProvStorageOptimized;
+import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
+import org.ligoj.app.plugin.prov.model.ProvStorageType;
+import org.ligoj.app.plugin.prov.model.ProvSupportPrice;
+import org.ligoj.app.plugin.prov.model.ProvSupportType;
+import org.ligoj.app.plugin.prov.model.ProvTenancy;
+import org.ligoj.app.plugin.prov.model.Rate;
+import org.ligoj.app.plugin.prov.model.VmOs;
+import org.ligoj.app.plugin.prov.ovh.ProvOvhPluginResource;
+import org.ligoj.bootstrap.core.INamableBean;
+import org.ligoj.bootstrap.core.curl.CurlProcessor;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The provisioning price service for AWS. Manage install or update of prices.
@@ -58,8 +75,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 */
 	public static final String CONF_DTYPE = ProvOvhPluginResource.KEY + ":database-type";
 	/**
-	 * Configuration key used for enabled database engine pattern names. When value is <code>null</code>, no
-	 * restriction.
+	 * Configuration key used for enabled database engine pattern names. When value is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_ENGINE = ProvOvhPluginResource.KEY + ":database-engine";
 
@@ -77,7 +93,6 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	 * Configuration key used for flavor pattern names. When value is <code>null</code>, no restriction.
 	 */
 	public static final String CONF_FLAVOR = ProvOvhPluginResource.KEY + ":flavor";
-
 
 	/**
 	 * <code>
@@ -143,33 +158,25 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 		nextStep(context, "initialize");
 		context.setValidOs(Pattern.compile(configuration.get(CONF_OS, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setValidDatabaseType(Pattern.compile(configuration.get(CONF_DTYPE, ".*"), Pattern.CASE_INSENSITIVE));
-		context.setValidDatabaseEngine(
-				Pattern.compile(configuration.get(CONF_ENGINE, "(mysql|postgresql)"), Pattern.CASE_INSENSITIVE));
+		context.setValidDatabaseEngine(Pattern.compile(configuration.get(CONF_ENGINE, "(mysql|postgresql)"), Pattern.CASE_INSENSITIVE));
 		context.setValidInstanceType(Pattern.compile(configuration.get(CONF_ITYPE, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setValidRegion(Pattern.compile(configuration.get(CONF_REGIONS, ".*")));
 
 		// Add all regional DC
 		final var regionData = toMap("ovh/regions.json", MAP_LOCATION);
 		context.getMapRegionById().putAll(regionData);
-		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, node).stream()
-				.collect(Collectors.toMap(ProvInstanceType::getCode, Function.identity())));
-		context.setDatabaseTypes(dtRepository.findAllBy(BY_NODE, node).stream()
-				.collect(Collectors.toMap(ProvDatabaseType::getCode, Function.identity())));
-		context.setPriceTerms(iptRepository.findAllBy(BY_NODE, node).stream()
-				.collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
-		context.setStorageTypes(stRepository.findAllBy(BY_NODE, node).stream()
-				.collect(Collectors.toMap(ProvStorageType::getCode, Function.identity())));
-		context.setPreviousStorage(spRepository.findAllBy("type.node", node).stream()
-				.collect(Collectors.toMap(ProvStoragePrice::getCode, Function.identity())));
-		context.setSupportTypes(st2Repository.findAllBy(BY_NODE, node).stream()
-				.collect(Collectors.toMap(ProvSupportType::getName, Function.identity())));
-		context.setPreviousSupport(sp2Repository.findAllBy("type.node", node).stream()
-				.collect(Collectors.toMap(ProvSupportPrice::getCode, Function.identity())));
-		context.setRegions(locationRepository.findAllBy(BY_NODE, context.getNode()).stream()
-				.filter(r -> isEnabledRegion(context, r))
+		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, node).stream().collect(Collectors.toMap(ProvInstanceType::getCode, Function.identity())));
+		context.setDatabaseTypes(dtRepository.findAllBy(BY_NODE, node).stream().collect(Collectors.toMap(ProvDatabaseType::getCode, Function.identity())));
+		context.setPriceTerms(iptRepository.findAllBy(BY_NODE, node).stream().collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
+		context.setStorageTypes(stRepository.findAllBy(BY_NODE, node).stream().collect(Collectors.toMap(ProvStorageType::getCode, Function.identity())));
+		context.setPreviousStorage(
+				spRepository.findAllBy("type.node", node).stream().collect(Collectors.toMap(ProvStoragePrice::getCode, Function.identity())));
+		context.setSupportTypes(st2Repository.findAllBy(BY_NODE, node).stream().collect(Collectors.toMap(ProvSupportType::getName, Function.identity())));
+		context.setPreviousSupport(
+				sp2Repository.findAllBy("type.node", node).stream().collect(Collectors.toMap(ProvSupportPrice::getCode, Function.identity())));
+		context.setRegions(locationRepository.findAllBy(BY_NODE, context.getNode()).stream().filter(r -> isEnabledRegion(context, r))
 				.collect(Collectors.toMap(INamableBean::getName, Function.identity())));
-		context.setPrevious(ipRepository.findAllBy("term.node", node).stream()
-				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		context.setPrevious(ipRepository.findAllBy("term.node", node).stream().collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(context, "retrieve-catalog");
@@ -209,11 +216,11 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	}
 
 	// Install instance prices
-	private void installInstancePrices(final UpdateContext context, final OvhAllPrices prices,
-			final ProvInstancePriceTerm hourlyTerm, ProvInstancePriceTerm monthlyTerm) {
+	private void installInstancePrices(final UpdateContext context, final OvhAllPrices prices, final ProvInstancePriceTerm hourlyTerm,
+			ProvInstancePriceTerm monthlyTerm) {
 
-//		// For each price/region/OS/software
-//		// Install term, type and price
+		// // For each price/region/OS/software
+		// // Install term, type and price
 		nextStep(context, "install-vm");
 		final var instances = prices.getInstances();
 		instances.stream().filter(i -> isEnabledRegion(context, i.getRegion().toLowerCase()))
@@ -221,21 +228,20 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	}
 
 	// Install database prices
-	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
-			final ProvInstancePriceTerm monthlyTerm, final OvhAllPrices prices) {
+	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm, final ProvInstancePriceTerm monthlyTerm,
+			final OvhAllPrices prices) {
 		// Database
 		nextStep(context, "install-database");
 		final var node = context.getNode();
-		context.setPreviousDatabase(dpRepository.findAllBy("term.node", node).stream()
-				.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
+		context.setPreviousDatabase(
+				dpRepository.findAllBy("term.node", node).stream().collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
 
-		prices.getDatabases().stream()
-				.filter(p -> isEnabledEngine(context, p.getEngine()) && isEnabledDatabaseType(context, p.getFlavor()))
+		prices.getDatabases().stream().filter(p -> isEnabledEngine(context, p.getEngine()) && isEnabledDatabaseType(context, p.getFlavor()))
 				.forEach((p) -> installDatabasePrices(context, hourlyTerm, monthlyTerm, p));
 	}
 
-	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm,
-			final ProvInstancePriceTerm monthlyTerm, final OvhAttrInstance p) {
+	private void installDatabasePrices(final UpdateContext context, final ProvInstancePriceTerm hourlyTerm, final ProvInstancePriceTerm monthlyTerm,
+			final OvhAttrInstance p) {
 		final var engine = p.getEngine();
 		context.getUsedRegions().forEach(regionName -> {
 			final var region = context.getRegions().get(regionName);
@@ -244,28 +250,23 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			var type = installDatabaseType(context, codeType, p);
 
 			// Install hourly based price
-			installDatabasePrice(context, hourlyTerm, codePricePlan, type, p.getHourlyCost(),
-					context.getHoursMonth(), engine, region);
+			installDatabasePrice(context, hourlyTerm, codePricePlan, type, p.getHourlyCost(), context.getHoursMonth(), engine, region);
 			// Install monthly based price
-			installDatabasePrice(context, monthlyTerm, codePricePlan, type, p.getMonthlyCost(), 1,
-					engine, region);
+			installDatabasePrice(context, monthlyTerm, codePricePlan, type, p.getMonthlyCost(), 1, engine, region);
 		});
 	}
 
-	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
-			final String codePricePlan, final ProvDatabaseType type, final Double costPeriod, double proRata,
-			final String engine, final ProvLocation region) {
+	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term, final String codePricePlan, final ProvDatabaseType type,
+			final Double costPeriod, double proRata, final String engine, final ProvLocation region) {
 		if (costPeriod != null) {
 			// Price is available for this term
-			installDatabasePrice(context, term, term.getCode() + "/" + codePricePlan, type, costPeriod * proRata,
-					engine, region);
+			installDatabasePrice(context, term, term.getCode() + "/" + codePricePlan, type, costPeriod * proRata, engine, region);
 		}
 	}
 
 	private void installSupportTypes(final UpdateContext context) throws IOException {
 		// Fetch previous prices
-		final var previous = st2Repository.findAllBy(BY_NODE, context.getNode()).stream()
-				.collect(Collectors.toMap(INamableBean::getName, Function.identity()));
+		final var previous = st2Repository.findAllBy(BY_NODE, context.getNode()).stream().collect(Collectors.toMap(INamableBean::getName, Function.identity()));
 
 		// Complete the set
 		csvForBean.toBean(ProvSupportType.class, "csv/ovh-prov-support-type.csv").forEach(t -> {
@@ -302,7 +303,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 	private List<Map<String, Object>> getResource(final Supplier<String> supplierUrl) throws IOException {
 		try (var curl = new CurlProcessor()) {
-			final var rawJson = StringUtils.defaultString(curl.get(supplierUrl.get()), "[]");
+			final var rawJson = Objects.toString(curl.get(supplierUrl.get()), "[]");
 			return objectMapper.readValue(rawJson, DATABASE_LIST2);
 		}
 	}
@@ -310,19 +311,18 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private OvhAllPrices getPrices() throws IOException {
 		final var pricesMap = getResource(this::getApiPriceUrl);
 		final OvhAllPrices result = new OvhAllPrices();
-		pricesMap.stream()
-				.filter(p -> p.get("term") != null)
-				.forEach(planPrice ->
-						planPrice.keySet().stream().filter(prop -> !prop.equals("term") && !prop.equals("planCode") && !prop.equals("regions") && !prop.startsWith("attr-"))
-								.forEach(region -> installRegionalPrice(region, planPrice, result))
-				);
+		pricesMap.stream().filter(p -> p.get("term") != null)
+				.forEach(planPrice -> planPrice.keySet().stream()
+						.filter(prop -> !prop.equals("term") && !prop.equals("planCode") && !prop.equals("regions") && !prop.startsWith("attr-"))
+						.forEach(region -> installRegionalPrice(region, planPrice, result)));
 
 		return result;
 	}
 
 	private void installRegionalPrice(final String region, final Map<String, Object> planPrice, OvhAllPrices result) {
 		// Each property is a region code
-		@SuppressWarnings("unchecked") final var regionalPrice = (Map<String, String>) planPrice.get(region);
+		@SuppressWarnings("unchecked")
+		final var regionalPrice = (Map<String, String>) planPrice.get(region);
 		var priceObj = new OvhAttrInstance();
 		var planCode = (String) planPrice.get("planCode");
 		priceObj.setPlanCode(planCode);
@@ -382,7 +382,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 				result.getDatabases().add(priceObj);
 			}
 		} else if (planCode.contains("instance") && !planCode.contains("bandwidth") || planCode.contains("b2-") || planCode.contains("c2-")
-				|| planCode.contains("t1-") || planCode.contains("t2-") || planCode.contains("i1-") && !planCode.contains(".ai1-1") || planCode.contains("d2-")) {
+				|| planCode.contains("t1-") || planCode.contains("t2-") || planCode.contains("i1-") && !planCode.contains(".ai1-1")
+				|| planCode.contains("d2-")) {
 			if (planPrice.get("attr-8") != null && planCode.contains("t1-") || planCode.contains("t2-")) {
 				setVmAttributes(priceObj, cpu, ram);
 				priceObj.setGPU((String) planPrice.get("attr-2"));
@@ -421,14 +422,9 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	private void setPrice(Map<String, String> regionalPrice, OvhAttrInstance priceObj, String attr) {
 		var value = regionalPrice.get(attr);
 		if (value != null && !value.contains("Included")) {
-			final Map<String, Consumer<Double>> setter = Map.of(
-					"linux.monthly", priceObj::setMonthlyLinuxCost,
-					"linux.hourly", priceObj::setHourlyLinuxCost,
-					"windows.monthly", priceObj::setMonthlyWindowsCost,
-					"windows.hourly", priceObj::setHourlyWindowsCost,
-					"monthly", priceObj::setMonthlyCost,
-					"hourly", priceObj::setHourlyCost
-			);
+			final Map<String, Consumer<Double>> setter = Map.of("linux.monthly", priceObj::setMonthlyLinuxCost, "linux.hourly", priceObj::setHourlyLinuxCost,
+					"windows.monthly", priceObj::setMonthlyWindowsCost, "windows.hourly", priceObj::setHourlyWindowsCost, "monthly", priceObj::setMonthlyCost,
+					"hourly", priceObj::setHourlyCost);
 			if (setter.containsKey(attr)) {
 				setter.get(attr).accept(parseCost(value));
 			}
@@ -467,8 +463,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 	}
 
-	private void installInstancePrice2(UpdateContext context, ProvInstancePriceTerm hourlyTerm, VmOs os,
-			OvhAttrInstance instance, ProvLocation region, ProvInstanceType type, ProvInstancePriceTerm monthlyTerm, String value) {
+	private void installInstancePrice2(UpdateContext context, ProvInstancePriceTerm hourlyTerm, VmOs os, OvhAttrInstance instance, ProvLocation region,
+			ProvInstanceType type, ProvInstancePriceTerm monthlyTerm, String value) {
 
 		if (!isEnabledOs(context, os)) {
 			return;
@@ -520,21 +516,21 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setLatency(Rate.BEST);
 			t.setDurability9(7);
 			t.setMaximal(4 * 1024d); // 4TiB
-			//switch (p.getName()) {
+			// switch (p.getName()) {
 			switch (p.getPlanCode().replace(".consumption", "")) {
-				case "volume.classic" -> {
-					t.setIops(250);
-					t.setName("Classic");
-				}
-				case "volume.high-speed" -> {
-					t.setIops(3000);
-					t.setName("High speed");
-				}
-				case "volume.high-speed-gen2" -> {
-					// TODO Missing "volume.high-speed-gen2" from the API price
-					t.setIops(20000);
-					t.setName("High speed Gen2");
-				}
+			case "volume.classic" -> {
+				t.setIops(250);
+				t.setName("Classic");
+			}
+			case "volume.high-speed" -> {
+				t.setIops(3000);
+				t.setName("High speed");
+			}
+			case "volume.high-speed-gen2" -> {
+				// TODO Missing "volume.high-speed-gen2" from the API price
+				t.setIops(20000);
+				t.setName("High speed Gen2");
+			}
 			}
 			t.setOptimized(ProvStorageOptimized.IOPS);
 
@@ -551,8 +547,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 
 	}
 
-	private <P extends OvhAttrInstance> void installStorage(UpdateContext context, final List<P> prices,
-			final Function<P, String> toCodeType, final BiConsumer<ProvStorageType, P> filler) {
+	private <P extends OvhAttrInstance> void installStorage(UpdateContext context, final List<P> prices, final Function<P, String> toCodeType,
+			final BiConsumer<ProvStorageType, P> filler) {
 		prices.stream().filter(p -> isEnabledRegion(context, p.getRegion().toLowerCase())).forEach(p -> {
 			final var codeType = toCodeType.apply(p);
 			final var type = installStorageType(context, codeType, filler, p);
@@ -568,7 +564,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install or update a storage type.
 	 */
-	//extends OvhStorage
+	// extends OvhStorage
 	private <P extends OvhAttrInstance> ProvStorageType installStorageType(final UpdateContext context, final String code,
 			final BiConsumer<ProvStorageType, P> aType, final P price) {
 		final var type = context.getStorageTypes().computeIfAbsent(code, c -> {
@@ -590,8 +586,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install or update a storage price.
 	 */
-	private void installStoragePrice(final UpdateContext context, final String region, final ProvStorageType type,
-			final double cost, final String code) {
+	private void installStoragePrice(final UpdateContext context, final String region, final ProvStorageType type, final double cost, final String code) {
 		final var price = context.getPreviousStorage().computeIfAbsent(code, c -> {
 			final var newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
@@ -611,10 +606,10 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install a new instance price as needed.
 	 */
-	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os,
-			final ProvInstanceType type, final double monthlyCost, final ProvLocation region) {
-		final var price = context.getPrevious()
-				.computeIfAbsent(os.name().toLowerCase()  + "/" + region.getName() + "/" + term.getCode() + "/" + type.getCode(), code -> {
+	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os, final ProvInstanceType type,
+			final double monthlyCost, final ProvLocation region) {
+		final var price = context.getPrevious().computeIfAbsent(os.name().toLowerCase() + "/" + region.getName() + "/" + term.getCode() + "/" + type.getCode(),
+				code -> {
 					// New instance price (not update mode)
 					final var newPrice = new ProvInstancePrice();
 					newPrice.setCode(code);
@@ -637,8 +632,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install a new instance type as needed.
 	 */
-	private ProvInstanceType installInstanceType(final UpdateContext context, final String code,
-			final OvhAttrInstance aType) {
+	private ProvInstanceType installInstanceType(final UpdateContext context, final String code, final OvhAttrInstance aType) {
 		final var type = context.getInstanceTypes().computeIfAbsent(code, c -> {
 			// New instance type (not update mode)
 			final var newType = new ProvInstanceType();
@@ -690,8 +684,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install a new database type as needed.
 	 */
-	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code,
-			final OvhAttrInstance database) {
+	private ProvDatabaseType installDatabaseType(final UpdateContext context, final String code, final OvhAttrInstance database) {
 		final var type = context.getDatabaseTypes().computeIfAbsent(code, c -> {
 			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
@@ -705,8 +698,7 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 			t.setCpu(database.getCPU());
 			t.setRam(database.getRAM()); // Convert to MiB * 1024.0
 			t.setAutoScale(false);
-			t.setDescription(String.format(
-					"{\"Dedicated node\":\"%s\",\"Private network\":\"%s\",\"Public Network\":\"%s\",\"storage\":\"%s\"}",
+			t.setDescription(String.format("{\"Dedicated node\":\"%s\",\"Private network\":\"%s\",\"Public Network\":\"%s\",\"storage\":\"%s\"}",
 					database.getDedicatedNode(), database.getPrivateNetwork(), database.getPublicNetwork(), database.getStorage()));
 
 			// Rating
@@ -720,9 +712,8 @@ public class OvhPriceImport extends AbstractImportCatalogResource {
 	/**
 	 * Install a new instance price as needed.
 	 */
-	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term,
-			final String localCode, final ProvDatabaseType type, final double monthlyCost, final String engine,
-			final ProvLocation region) {
+	private void installDatabasePrice(final UpdateContext context, final ProvInstancePriceTerm term, final String localCode, final ProvDatabaseType type,
+			final double monthlyCost, final String engine, final ProvLocation region) {
 		final var price = context.getPreviousDatabase().computeIfAbsent(region.getName() + "/" + localCode, c -> {
 			// New instance price
 			final var newPrice = new ProvDatabasePrice();
